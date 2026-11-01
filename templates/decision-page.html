@@ -136,7 +136,7 @@ summary{cursor:pointer;font-weight:600}details[open] summary{margin-bottom:12px}
 /* decision page: options to pick from */
 .opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-top:14px}
 .opt{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;display:flex;flex-direction:column;gap:12px;scroll-margin-top:70px}
-.opt.on{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
+.opt.on{border-color:var(--ink);box-shadow:0 0 0 2px var(--ink)}
 .opt-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.opt-h b{font-size:17px;letter-spacing:-.01em}
 .opt>p{margin:0;color:var(--mute);font-size:14px}
 .preview{background:var(--soft);border-radius:10px;overflow:hidden;min-height:200px;display:grid;place-items:center;color:var(--mute);font-size:13px;padding:12px;text-align:center}
@@ -144,8 +144,12 @@ summary{cursor:pointer;font-weight:600}details[open] summary{margin-bottom:12px}
 .pc{margin:0;padding:0;list-style:none;font-size:14px;display:grid;gap:4px}
 .pc li{display:grid;grid-template-columns:14px 1fr;gap:4px;align-items:baseline}
 .pc li::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--good)}.pc li.con::before{background:var(--bad)}
-.pick{align-self:flex-start;margin-top:auto;font:inherit;font-size:14px;font-weight:600;padding:8px 18px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
-.pick:hover{border-color:var(--ink)}.opt.on .pick{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.pick{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:auto;font:inherit;font-size:15px;font-weight:600;padding:11px 18px;border-radius:10px;border:1.5px solid var(--ink);background:var(--surface);color:var(--ink);cursor:pointer}
+.pick::before{content:"";flex:none;width:16px;height:16px;box-sizing:border-box;border:1.5px solid currentColor;border-radius:50%;display:grid;place-items:center;font-size:11px;line-height:1}
+.opts[data-multi] .pick::before{border-radius:4px}
+.pick:hover{background:var(--soft)}
+.opt.on .pick{background:var(--ink);color:var(--surface)}.opt.on .pick::before{content:"\2713";background:var(--surface);color:var(--ink);border-color:var(--surface)}
+.opts:has(.opt.on):not([data-multi]) .opt:not(.on){opacity:.6}
 /* answers: Copy results pinned at the right of the sticky nav; a note box under each question */
 nav.toc .copy-all{flex:none;margin-left:auto;position:sticky;right:0;font:inherit;font-size:13.5px;font-weight:600;padding:6px 14px;border-radius:999px;border:1px solid var(--ink);background:var(--ink);color:var(--surface);cursor:pointer;box-shadow:-14px 0 10px var(--bg)}
 nav.toc .copy-all.done{background:var(--good);border-color:var(--good)}
