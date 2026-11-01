@@ -17,6 +17,7 @@ for f in templates/daylight-report.html templates/midnight-report.html templates
 done
 grep -q "latest is always on top" "$root/hooks/always.md" || fail "iteration rule missing"
 grep -q "index of indexes" "$root/hooks/always.md" || fail "hub rule missing"
+grep -q "Files are links" "$root/hooks/always.md" || fail "file link rule missing"
 
 # without CLAUDE_PLUGIN_ROOT it resolves its own install folder
 out2=$(sh "$root/hooks/prism-activate.sh")

@@ -15,3 +15,4 @@ Musts, every time:
 7. Hand over with links: the page, its index, and the hub when there is one, each as a markdown link with a 🔗 label and the full file:// URL. Never only a path.
 8. Check before handing over: render at 1440px and 390px (`node {{ROOT}}/scripts/check-report.mjs <page.html>`), click the interactive parts, make every view agree on the same facts, and run the impeccable detector when it is installed. No em dashes.
 9. Compact: a page is one HTML file. Libraries (Cytoscape, chart or table packages) load from a pinned CDN (`https://cdn.jsdelivr.net/npm/<pkg>@<x.y.z>/...`), never inlined. Images as small data URIs (downscaled JPEG) or as files next to the page.
+10. Files are links: every local file the page names is a plain `<a>` with a relative href, on the label itself ("Full quality"), not on an extra file-name line. Never a raw path, a path box or a Copy button.
