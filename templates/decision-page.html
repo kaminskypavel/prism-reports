@@ -1,0 +1,324 @@
+<!doctype html>
+<!-- Decision page template (Daylight). Use it whenever the user must pick between options or approve a design.
+     Copy, keep the style block and all script blocks, replace the demo content. Latest round first; earlier rounds collapse under "Earlier rounds".
+     Rules: skills/prism-reports/SKILL.md in the prism-reports plugin. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Decision title</title>
+<meta name="report-topic" content="Topic">
+<meta name="report-date" content="YYYY-MM-DD HH:MM">
+<style>
+:root{
+  --bg:#f3f3f0;--surface:#fff;--soft:#f7f7f4;--ink:#141414;--mute:#5c5c56;--faint:#8a8a84;--line:#e2e2dc;--track:#ecece8;
+  --accent:#2440e8;--accent-tint:#eaedfd;
+  --good:#0f766e;--good-tint:#e6f3f1;--warn:#b45309;--warn-tint:#fbf1e4;--bad:#be185d;--bad-tint:#fbe9f1;--dead:#e11d48;
+  /* categorical series for charts only (dark enough for white labels): */
+  --c1:#2440e8;--c2:#0f766e;--c3:#b45309;--c4:#be185d;--c5:#6d28d9;--c6:#0e7490;--c7:#475569;
+  
+  /* faint hues for stat cards: */
+  --tint-slate:rgba(71,85,105,.06);--tint-teal:rgba(15,118,110,.07);--tint-blue:rgba(36,64,232,.06);--tint-amber:rgba(180,83,9,.07);--tint-pink:rgba(190,24,93,.06);--tint-cyan:rgba(14,116,144,.07);
+  --scroll:#c9c9c2;--radius:12px;--font:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scrollbar-color:var(--scroll) transparent}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 var(--font);font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+::selection{background:var(--ink);color:var(--surface)}
+a{color:inherit;text-decoration-color:var(--faint);text-underline-offset:3px}a:hover{text-decoration-color:var(--ink)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.wrap{max-width:1180px;margin:0 auto;padding:36px 32px 96px}
+h1{font-size:36px;line-height:1.12;letter-spacing:-.025em;margin:0;font-weight:700;text-wrap:balance}
+h2{font-size:24px;line-height:1.2;letter-spacing:-.02em;margin:0;font-weight:700;text-wrap:balance}
+h3{font-size:16px;margin:0 0 8px}
+.lede{font-size:18px;line-height:1.45;max-width:70ch;margin:10px 0 6px;font-weight:500}
+.sub{color:var(--mute);font-size:13.5px;margin:0}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;line-height:1;padding:5px 9px;border-radius:999px;background:var(--soft);color:var(--mute);white-space:nowrap}
+.chip::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.chip.good{background:var(--good-tint);color:var(--good)}.chip.warn{background:var(--warn-tint);color:var(--warn)}.chip.bad{background:var(--bad-tint);color:var(--bad)}.chip.accent{background:var(--accent-tint);color:var(--accent)}
+.chip.plain::before{display:none}
+/* call to action: a titled block with a stronger ink border, no color; 1-3 numbered asks right under the answer */
+.cta{margin:26px 0 0;padding:0 0 6px;background:var(--surface);border:1.5px solid var(--ink);border-radius:var(--radius);overflow:hidden}
+.cta-h{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 10px;padding:16px 20px 2px}.cta-h b{font-size:17px;letter-spacing:-.01em}.cta-h span{font-size:13px;color:var(--mute)}
+.next{margin:0;padding:0;list-style:none;counter-reset:n}
+.next li{display:grid;grid-template-columns:28px 1fr;gap:14px;padding:14px 20px;counter-increment:n}
+.next li+li{border-top:1px solid var(--line)}
+.next li::before{content:counter(n);width:28px;height:28px;border-radius:50%;background:var(--ink);color:var(--surface);display:grid;place-items:center;font-weight:700;font-size:13px}
+.next b{display:block;font-size:15.5px}.next span{color:var(--mute);font-size:14px}
+/* stat strip: at most 4 cards, ink numbers, each on its own faint hue so they read apart; .good .warn .bad pick the hue by meaning */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin:14px 0 0;padding:8px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius)}
+.stat{padding:14px 16px;border-radius:10px;text-decoration:none;display:block;background:var(--tint-slate)}
+.stat:nth-child(4n+2){background:var(--tint-teal)}.stat:nth-child(4n+3){background:var(--tint-blue)}.stat:nth-child(4n){background:var(--tint-amber)}
+.stat.good{background:var(--tint-teal)}.stat.warn{background:var(--tint-amber)}.stat.bad{background:var(--tint-pink)}
+.stat .n{display:block;font-size:28px;font-weight:700;letter-spacing:-.02em;line-height:1.15}.stat .l{display:block;font-size:13px;color:var(--mute);margin-top:2px}
+a.stat:hover .l{color:var(--ink)}
+/* nav: one scrolling row, active section marked */
+nav.toc{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;margin:28px -32px 0;padding:10px 32px;position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--line)}
+nav.toc::-webkit-scrollbar{display:none}
+nav.toc a{flex:none;text-decoration:none;font-size:13.5px;font-weight:600;color:var(--mute);padding:6px 12px;border-radius:999px}
+nav.toc a:hover{color:var(--ink);background:var(--surface)}nav.toc a.on{color:var(--ink);background:var(--surface);box-shadow:inset 0 0 0 1px var(--line)}
+/* sections + panels */
+section{margin-top:56px;scroll-margin-top:64px}
+.dh{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.thesis{font-size:15.5px;max-width:75ch;margin:6px 0 16px;color:var(--mute)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px 22px}
+.panel+.panel,.cols+.panel,.panel+.cols,.cols+.cols{margin-top:14px}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px}.cols>.panel{margin-top:0}
+.ph{font-size:13px;color:var(--mute);font-weight:600;margin-bottom:14px}
+.cap{font-size:13px;color:var(--mute);margin-top:10px}
+.note{background:var(--soft);border-radius:10px;padding:12px 14px;font-size:14px}
+/* range / value bars: <div class="rb"><div class="l">Label<small>note</small></div><div class="t"><i style="width:60%"></i></div><div class="v">$40</div></div> */
+.rb{display:grid;grid-template-columns:220px 1fr 90px;gap:14px;align-items:center;margin:10px 0}
+.rb .l{font-weight:600;font-size:14px;line-height:1.35}.rb .l small{display:block;font-weight:400;color:var(--mute);font-size:12.5px}
+.rb .t{position:relative;height:22px;background:var(--track);border-radius:6px}
+.rb .t i{position:absolute;top:0;bottom:0;left:0;border-radius:6px;background:var(--c7)}.rb .t i.lo{opacity:.35}
+.rb .v{font-weight:700;text-align:right;font-size:15px}.rb.on .t i{background:var(--good)}.rb.on .v{color:var(--good)}
+/* stacked bar: <div class="stack"><div style="flex:3;background:var(--c2)">60%</div>...</div> (use --c1..--c7 so white labels pass contrast) */
+.stack{display:flex;height:40px;border-radius:8px;overflow:hidden;color:#fff;font-size:12.5px;font-weight:700;gap:2px}
+.stack div{display:flex;align-items:center;justify-content:center;white-space:nowrap;overflow:hidden}
+/* treemap: set grid-template-columns per chart; fills from --c1..--c7 */
+.tm{display:grid;gap:4px;height:240px}
+.tm>div{border-radius:8px;color:#fff;padding:10px 12px;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden}
+.tm b{font-size:20px;letter-spacing:-.02em;line-height:1.1}.tm small{font-size:12px}
+/* verdict cards: tinted, ink text; .good .warn .bad .dead */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.grid>*{border-radius:10px;padding:12px 14px;background:var(--soft);color:var(--ink);text-decoration:none;display:flex;flex-direction:column;gap:2px}
+.grid b{font-size:15px}.grid small{font-size:13px;color:var(--mute);line-height:1.4}
+.grid>.good{background:var(--good-tint)}.grid>.warn{background:var(--warn-tint)}.grid>.bad{background:var(--bad-tint)}
+.grid>.dead{background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--dead)}
+/* people: avatar + name + role, used in cards and table cells */
+.who{display:flex;align-items:center;gap:10px;min-width:0}
+.who img,.who .av{width:32px;height:32px;border-radius:50%;object-fit:cover;flex:none;background:var(--c7);color:#fff;display:grid;place-items:center;font-size:12px;font-weight:700}
+.who span{display:flex;flex-direction:column;min-width:0}td .who{min-width:200px}.who b{font-weight:600}.who small{color:var(--mute);font-size:12.5px;line-height:1.35}
+/* step path for one chain: <div class="path"><span class="step">You</span><span class="arrow" aria-hidden="true"></span>...</div> */
+.path{display:flex;align-items:center;flex-wrap:wrap;gap:6px}
+.step{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:14px;font-weight:600}
+.step.end{background:var(--good-tint);border-color:transparent;color:var(--good)}
+.arrow{width:16px;height:1.5px;background:var(--faint);position:relative}.arrow::after{content:"";position:absolute;right:-1px;top:-3px;border:4px solid transparent;border-left:5px solid var(--faint);border-right:0}
+/* numbered cards */
+.nums{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.num{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;font-size:14px}
+.num b{display:block;font-size:15px;margin-bottom:2px}.num span{color:var(--mute);font-size:13.5px}
+/* verdict matrix: set grid-template-columns per matrix; icons are inline SVG (see demo) */
+.mx{display:grid;align-items:stretch;min-width:560px}
+.mx>div{padding:9px 12px 9px 0;border-bottom:1px solid var(--line);font-size:14px;display:flex;align-items:center;gap:6px;min-height:40px}
+.mx .h{display:block;font-size:12px;color:var(--mute);font-weight:600;border-bottom-color:var(--ink);align-content:end}
+.mx .c{font-weight:600}.mx .why{color:var(--mute);font-size:13px}
+.ic{width:20px;height:20px;vertical-align:-5px;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.ic.ok{stroke:var(--good)}.ic.no{stroke:var(--faint)}.ic.q{stroke:var(--warn)}
+/* tables (the script below adds sorting to all, filters only to <table data-filter>) */
+.tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;color:var(--mute);font-weight:600;border-bottom-color:var(--ink);white-space:nowrap}tr:last-child td{border-bottom:0}
+tbody tr:hover td,tr:hover>td{background:var(--soft)}
+th.dt-sort{cursor:pointer;user-select:none}th.dt-sort::after{content:"";display:inline-block;margin-left:6px;width:6px;height:6px;border-right:1.5px solid var(--faint);border-bottom:1.5px solid var(--faint);transform:rotate(45deg) translateY(-3px);opacity:.5}
+th[aria-sort=ascending]::after{transform:rotate(-135deg) translateY(-1px);opacity:1;border-color:var(--ink)}th[aria-sort=descending]::after{opacity:1;border-color:var(--ink)}
+.dt-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.dt-bar input,.dt-bar select,.dt-bar button{font:inherit;font-size:13px;padding:7px 12px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.dt-bar input{min-width:220px}.dt-bar button{cursor:pointer;color:var(--mute)}.dt-bar button:hover{color:var(--ink)}
+.dt-count{margin-left:auto;font-size:13px;color:var(--mute)}
+/* iterations: newest first. Round/version links in nav.toc (latest marked .latest); the latest round is the first section after the CTA; earlier rounds collapse in <details> under "Earlier rounds", newest of them first. */
+nav.toc a.latest::after{content:"latest";margin-left:6px;font-size:11px;font-weight:700;color:var(--accent)}
+.round-meta{font-size:13px;color:var(--mute);margin:2px 0 14px}
+/* appendix */
+details{border-top:1px solid var(--line);padding:14px 0}details:last-child{border-bottom:1px solid var(--line)}
+summary{cursor:pointer;font-weight:600}details[open] summary{margin-bottom:12px}
+.src{font-size:13.5px;line-height:1.9;color:var(--mute)}
+@media (max-width:640px){
+  .wrap{padding:24px 16px 64px}h1{font-size:28px}.lede{font-size:16.5px}h2{font-size:21px}
+  nav.toc{margin:22px -16px 0;padding:8px 16px}
+  .stats{grid-template-columns:1fr 1fr}
+  .rb{grid-template-columns:110px 1fr 64px;gap:10px}.panel{padding:16px}
+  .dt-bar input{min-width:0;flex:1}
+}
+/* decision page: options to pick from */
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-top:14px}
+.opt{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;display:flex;flex-direction:column;gap:12px;scroll-margin-top:70px}
+.opt.on{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
+.opt-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.opt-h b{font-size:17px;letter-spacing:-.01em}
+.opt>p{margin:0;color:var(--mute);font-size:14px}
+.preview{background:var(--soft);border-radius:10px;overflow:hidden;min-height:200px;display:grid;place-items:center;color:var(--mute);font-size:13px;padding:12px;text-align:center}
+.preview img{width:100%;height:auto;display:block}
+.pc{margin:0;padding:0;list-style:none;font-size:14px;display:grid;gap:4px}
+.pc li{display:grid;grid-template-columns:14px 1fr;gap:4px;align-items:baseline}
+.pc li::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--good)}.pc li.con::before{background:var(--bad)}
+.pick{align-self:flex-start;margin-top:auto;font:inherit;font-size:14px;font-weight:600;padding:8px 18px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.pick:hover{border-color:var(--ink)}.opt.on .pick{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.decide{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:6px 20px 12px}
+.decide textarea{flex:1 1 280px;font:inherit;font-size:14px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-height:40px;resize:vertical;background:var(--surface);color:var(--ink)}
+.decide button{font:inherit;font-size:14px;font-weight:600;padding:8px 16px;border-radius:999px;border:1px solid var(--ink);background:var(--ink);color:var(--surface);cursor:pointer}
+.decide button:disabled{opacity:.35;cursor:default}
+#choice{margin-left:auto;font-size:13px;color:var(--mute);white-space:nowrap}#choice b{color:var(--ink)}
+</style>
+</head>
+<body>
+<a class="report-back" dir="ltr" href="index.html" style="display:inline-block;margin:16px 0 0 16px;padding:6px 14px;border-radius:999px;background:#141414;color:#fff;text-decoration:none;font:600 13px/1.4 -apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,sans-serif">&larr; All designs</a>
+<div class="wrap">
+  <header>
+    <h1>Which option should we ship for the thing being decided?</h1>
+    <p class="lede">Recommendation: B, in one sentence that names why.</p>
+    <p class="sub">Round 2 of 2 · YYYY-MM-DD HH:MM · what is being decided and what happens after the pick</p>
+  </header>
+
+  <div class="cta">
+    <div class="cta-h"><b>Your call</b><span>Pick one below. Add a note if you want; it is copied with your pick.</span></div>
+    <div class="decide"><textarea id="note" placeholder="Optional note, e.g. 'B, but with A's header'"></textarea><button id="copy" type="button" disabled>Copy my pick</button><span id="choice">Nothing picked yet</span></div>
+  </div>
+
+  <nav class="toc"><a class="latest" href="#round-2">Round 2</a><a href="#compare">Compare</a><a href="#earlier">Round 1</a></nav>
+
+  <section id="round-2">
+    <div class="dh"><h2>Round 2: the two finalists</h2><span class="chip accent">Latest</span></div>
+    <p class="round-meta">YYYY-MM-DD HH:MM · what changed since round 1, in one line</p>
+    <div class="opts">
+      <article class="opt" data-key="A" data-name="Short name A" id="opt-A">
+        <div class="opt-h"><b>A. Short name</b></div>
+        <p>One line on what this option is.</p>
+        <div class="preview">mockup, screenshot (img) or live HTML in the product's own style</div>
+        <ul class="pc"><li>What it does well</li><li class="con">What it costs or risks</li></ul>
+        <button class="pick" type="button">Pick A</button>
+      </article>
+      <article class="opt" data-key="B" data-name="Short name B" id="opt-B">
+        <div class="opt-h"><b>B. Short name</b><span class="chip good">Recommended</span></div>
+        <p>One line on what this option is.</p>
+        <div class="preview">mockup, screenshot (img) or live HTML in the product's own style</div>
+        <ul class="pc"><li>What it does well</li><li class="con">What it costs or risks</li></ul>
+        <button class="pick" type="button">Pick B</button>
+      </article>
+    </div>
+  </section>
+
+  <section id="compare">
+    <div class="dh"><h2>How do they compare?</h2></div>
+    <p class="thesis">Only the criteria that decide it.</p>
+    <div class="panel"><table><thead><tr><th>Criterion</th><th>A</th><th>B</th></tr></thead><tbody>
+      <tr><td>Criterion one</td><td><svg class="ic ok" viewBox="0 0 20 20" aria-label="yes"><path d="M5 10.5l3.2 3.2L15 7"/></svg></td><td><svg class="ic ok" viewBox="0 0 20 20" aria-label="yes"><path d="M5 10.5l3.2 3.2L15 7"/></svg></td></tr>
+      <tr><td>Criterion two</td><td><svg class="ic no" viewBox="0 0 20 20" aria-label="no"><path d="M6 6l8 8M14 6l-8 8"/></svg></td><td><svg class="ic ok" viewBox="0 0 20 20" aria-label="yes"><path d="M5 10.5l3.2 3.2L15 7"/></svg></td></tr>
+    </tbody></table></div>
+  </section>
+
+  <section id="earlier">
+    <div class="dh"><h2>Earlier rounds</h2></div>
+    <p class="thesis">Newest first. Kept for the record; only the latest round can be picked.</p>
+    <details><summary>Round 1 · YYYY-MM-DD HH:MM · what we learned and why it moved on</summary>
+      <div class="opts"><article class="opt"><div class="opt-h"><b>Option from round 1</b></div><div class="preview">preview</div></article></div>
+    </details>
+  </section>
+</div>
+<script>
+/* Tables: every <table> (and .mx matrix) gets a horizontal scroller for narrow screens; every <table> gets click-to-sort headers.
+   Add data-filter to a <table> for a filter box, a Clear button and a row count; mark filterable columns with <th data-facet>.
+   Sort key: a cell's data-sort, else its text ($, %, commas and currency signs read as numbers). <table data-plain> opts out of sorting. */
+document.querySelectorAll("table, .mx").forEach((el) => {
+  if (el.parentElement.classList.contains("tscroll")) return;
+  const cols = el.tagName === "TABLE" ? (el.rows[0]?.cells.length || 0) : 0;
+  if (cols >= 4) el.style.minWidth = `${cols * 120}px`; // wide tables scroll inside their panel on phones instead of crushing every cell
+  const w = document.createElement("div");
+  w.className = "tscroll";
+  el.before(w);
+  w.append(el);
+});
+document.querySelectorAll("table:not([data-plain])").forEach((t) => {
+  const head = [...t.rows].find((r) => r.querySelector("th"));
+  if (!head) return;
+  const body = [...t.rows].filter((r) => r !== head);
+  if (body.length < 2) return;
+  const key = (r, i) => (r.cells[i] ? (r.cells[i].dataset.sort ?? r.cells[i].textContent.trim()) : "");
+  const txt = (r, i) => (r.cells[i] ? r.cells[i].textContent.trim() : "");
+  const num = (s) => (/^[-+]?[$₪€£]?\s?[\d.,]+\s?[%kKmMbB]?$/.test(s) ? parseFloat(s.replace(/[^\d.-]/g, "")) : NaN);
+  [...head.cells].forEach((th, i) => {
+    th.classList.add("dt-sort");
+    th.tabIndex = 0;
+    th.setAttribute("aria-sort", "none");
+    const sort = () => {
+      const dir = th.getAttribute("aria-sort") === "ascending" ? "descending" : "ascending";
+      for (const h of head.cells) h.setAttribute("aria-sort", "none");
+      th.setAttribute("aria-sort", dir);
+      const numeric = body.every((r) => !key(r, i) || !Number.isNaN(num(key(r, i))));
+      body.sort((a, b) => {
+        const x = key(a, i), y = key(b, i);
+        const c = numeric ? (num(x) || 0) - (num(y) || 0) : x.localeCompare(y, undefined, { numeric: true });
+        return dir === "ascending" ? c : -c;
+      });
+      for (const r of body) r.parentNode.append(r);
+    };
+    th.addEventListener("click", sort);
+    th.addEventListener("keydown", (e) => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), sort()));
+  });
+  if (!t.hasAttribute("data-filter")) return;
+  const bar = Object.assign(document.createElement("div"), { className: "dt-bar" });
+  const q = Object.assign(document.createElement("input"), { type: "search", placeholder: "Filter rows" });
+  q.setAttribute("aria-label", "Filter rows");
+  const clear = Object.assign(document.createElement("button"), { type: "button", textContent: "Clear", hidden: true });
+  const count = Object.assign(document.createElement("span"), { className: "dt-count" });
+  const selects = [];
+  bar.append(q);
+  [...head.cells].forEach((th, i) => {
+    if (!th.hasAttribute("data-facet")) return;
+    const name = th.textContent.trim();
+    const vals = [...new Set(body.map((r) => txt(r, i)).filter(Boolean))].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+    const s = document.createElement("select");
+    s.setAttribute("aria-label", name);
+    s.dataset.col = i;
+    s.append(new Option(`${name}: all`, ""), ...vals.map((v) => new Option(`${name}: ${v}`, v)));
+    selects.push(s);
+    bar.append(s);
+  });
+  const apply = () => {
+    const term = q.value.trim().toLowerCase();
+    let shown = 0;
+    for (const r of body) {
+      r.hidden = !((!term || r.textContent.toLowerCase().includes(term)) && selects.every((s) => !s.value || txt(r, +s.dataset.col) === s.value));
+      shown += !r.hidden;
+    }
+    clear.hidden = !term && selects.every((s) => !s.value);
+    count.textContent = shown === body.length ? `${body.length} rows` : `${shown} of ${body.length}`;
+  };
+  clear.addEventListener("click", () => { q.value = ""; for (const s of selects) s.value = ""; apply(); });
+  q.addEventListener("input", apply);
+  for (const s of selects) s.addEventListener("change", apply);
+  bar.append(clear, count);
+  (t.closest(".tscroll") || t).before(bar);
+  apply();
+});
+/* Nav: mark the section in view. */
+(() => {
+  const links = [...document.querySelectorAll("nav.toc a")];
+  if (!links.length || !("IntersectionObserver" in window)) return;
+  const io = new IntersectionObserver((es) => {
+    for (const e of es) if (e.isIntersecting) for (const a of links) a.classList.toggle("on", a.hash === `#${e.target.id}`);
+  }, { rootMargin: "-35% 0px -60% 0px" });
+  for (const s of document.querySelectorAll("section[id]")) io.observe(s);
+})();
+</script>
+<script>
+/* Decision page: Pick buttons inside .opt[data-key][data-name]; the pick and an optional note are copied as one line to paste back in the chat, and remembered per page. */
+(() => {
+  const store = `pick:${location.pathname}`;
+  const title = (document.querySelector("h1")?.textContent || document.title).trim();
+  const choice = document.getElementById("choice"), note = document.getElementById("note"), copy = document.getElementById("copy");
+  const opt = (k) => document.querySelector(`.opt[data-key="${k}"]`);
+  let picked = null;
+  const line = () => `Decision "${title}": option ${picked} (${opt(picked).dataset.name})${note && note.value.trim() ? `. Note: ${note.value.trim()}` : ""}`;
+  const send = async () => {
+    if (!picked) return;
+    try { await navigator.clipboard.writeText(line()); choice.innerHTML = `<b>Picked ${picked}: ${opt(picked).dataset.name}</b> · copied, paste it in the chat`; }
+    catch { choice.innerHTML = `<b>Picked ${picked}</b> · copy blocked, type it in the chat`; }
+  };
+  const mark = (k) => {
+    picked = opt(k) ? k : null;
+    for (const o of document.querySelectorAll(".opt[data-key]")) {
+      o.classList.toggle("on", o.dataset.key === picked);
+      const b = o.querySelector(".pick");
+      if (b) b.textContent = o.dataset.key === picked ? "Picked" : `Pick ${o.dataset.key}`;
+    }
+    if (copy) copy.disabled = !picked;
+    if (choice) choice.innerHTML = picked ? `<b>Picked ${picked}: ${opt(picked).dataset.name}</b>` : "Nothing picked yet";
+  };
+  for (const b of document.querySelectorAll(".opt .pick")) b.addEventListener("click", () => { mark(b.closest(".opt").dataset.key); try { localStorage.setItem(store, picked); } catch {} send(); });
+  copy?.addEventListener("click", send);
+  try { mark(localStorage.getItem(store)); } catch { mark(null); }
+})();
+</script>
+</body>
+</html>

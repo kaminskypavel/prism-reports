@@ -1,0 +1,17 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "prism-reports",
+  "description": "Minimal, decision-first HTML reports and decision pages for AI agents.",
+  "owner": {
+    "name": "Pavel 'PK' Kaminsky",
+    "url": "https://github.com/kaminskypavel"
+  },
+  "plugins": [
+    {
+      "name": "prism-reports",
+      "description": "One report style, templates, an index of every report, and render checks. Loaded every session by a SessionStart hook.",
+      "source": "./",
+      "category": "productivity"
+    }
+  ]
+}

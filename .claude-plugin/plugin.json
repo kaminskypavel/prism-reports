@@ -1,0 +1,15 @@
+{
+  "name": "prism-reports",
+  "version": "0.3.0",
+  "description": "Minimal, decision-first HTML reports, dashboards and decision pages: one style, templates, an index of every report, and render checks before handover.",
+  "author": {
+    "name": "Pavel 'PK' Kaminsky",
+    "url": "https://github.com/kaminskypavel"
+  },
+  "homepage": "https://github.com/kaminskypavel/prism-reports",
+  "repository": "https://github.com/kaminskypavel/prism-reports",
+  "license": "MIT",
+  "keywords": ["reports", "html", "dashboards", "design", "decision-pages"],
+  "skills": "./skills/",
+  "hooks": "./hooks/prism-hooks.json"
+}
