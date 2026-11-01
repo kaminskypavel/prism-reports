@@ -14,6 +14,7 @@ Do them together in one pass, fix what one look shows, then look again.
 - **Chrome for Testing asks for the macOS keychain** ("wants to use your confidential information stored in Chromium Safe Storage") when a script launches it without `--use-mock-keychain`. Always pass it: `chromium.launch({ args: ["--use-mock-keychain"] })`, and add it to any custom `spawn` of the binary.
 - **Extracting the template's style or scripts with a regex** can match the words `<style>` or `<script>` inside the template's own comment and produce a broken page with no CSS or JS. Anchor on `<style>\n:root` and on line-start `<script>\n`.
 - **Grid matrices with `align-items:center`** make empty cells collapse and borders zig-zag; the template uses `stretch` plus flex-centered cells.
+- **Cytoscape node photos over `file://`** fail with a CORS error unless the node style sets `background-image-crossorigin: "null"`; `<img>` tags are not affected. `check-report.mjs` prints the error.
 - **Clicking a canvas in Playwright** needs it scrolled into view first; clicks outside the viewport land on nothing.
 - **Biome/Ultracite formatting** strips a space after an inline tag (`<b>X</b> text` becomes `<b>X</b>text`). Where a space must follow `</b>`, `</a>`, `</small>`, `</tspan>`, write `&nbsp;`.
 - **Report vs product style**: never repaint a product mockup in the report palette or force it light or dark.

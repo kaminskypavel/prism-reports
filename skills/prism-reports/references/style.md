@@ -19,7 +19,7 @@
 - Categorical series for charts (`--c1..--c7`: blue, teal, amber, pink, violet, cyan, slate), dark enough for white labels. Use them to tell series apart, not to decorate. Violet is flagged by the impeccable detector as an "AI palette"; prefer cyan when a fifth hue is not needed.
 - Browser surfaces themed: `::selection`, `:focus-visible` (2px accent outline), thin scrollbars, underline offset 3px; `prefers-reduced-motion` turns off smooth scrolling.
 - Midnight (dark, opt-in only): page `#000`, surfaces `#121212` with a 1px `#2E2E2E` border, ink white, muted `#B3B3B3`, accent `#A78BFA`; semantic colors as light text on dark tints.
-- Compact: libraries from a pinned CDN, never inlined; photos downscaled (about 200px) before they become data URIs.
+- Compact: libraries from a pinned CDN, never inlined. Photos are downscaled to about 160px and saved once in a folder next to the page (`<page-name>/<photo>.jpg`), referenced by relative path from cards, tables and networks; never embed the same photo as a data URI in several places.
 - Never: gradient tiles, rainbow rows, white text on light or mid-tone fills, colored left borders above 1px, decorative shadows, emoji or Unicode ✓ ✕ as icons, eyebrow labels above headings.
 
 ## Components (all in the templates)

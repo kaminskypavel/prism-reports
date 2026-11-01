@@ -6,7 +6,7 @@ Who knows whom, intro paths, dependencies, org links: an interactive Cytoscape.j
 
 - Load a pinned Cytoscape from the CDN: `<script src="https://cdn.jsdelivr.net/npm/cytoscape@3.34.4/dist/cytoscape.min.js"></script>` (check the latest version on jsdelivr, then pin it). Never inline the library; it is 430 KB.
 - Layered `preset` layout, top-down or left-to-right: one layer per hop (you, your contacts, their contacts, bridges, targets). Hand-set the order of each middle layer to cut crossings; order the target layer by the bridge that reaches each target. Stagger labels in a crowded layer (alternate y by about 50px).
-- People are circles with their photo (`background-image` data URI, `background-fit: cover`) or an initials SVG (`data:image/svg+xml;utf8,` + `encodeURIComponent`, not base64). Status as a 3px border color (for example teal = left the company, slate = still there); dashed and faded for "no path".
+- People are circles with their photo (`background-image` pointing at the same photo file the page's cards and tables use, `background-fit: cover`, and `background-image-crossorigin: "null"`, or Chrome blocks the image over `file://` with a CORS error) or an initials SVG (`data:image/svg+xml;utf8,` + `encodeURIComponent`, not base64). Status as a 3px border color (for example teal = left the company, slate = still there); dashed and faded for "no path".
 - One edge style per relationship type. Dense many-to-many edges (who overlapped with whom) stay hidden until a node is clicked. Edge labels only on lit edges, `text-rotation: autorotate`.
 - `userZoomingEnabled: false` and `userPanningEnabled: false` so the page scrolls on touch; height about 0.6 of the width, capped (420-680px); a legend and a Reset button ("Show the recommended path").
 
