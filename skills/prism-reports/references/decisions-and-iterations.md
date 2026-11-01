@@ -2,14 +2,23 @@
 
 ## Decision pages
 
-Whenever the user must pick between options or approve a design, render `templates/decision-page.html`, even for two options and even when they did not ask for HTML. It is the "pick one" family member of the report.
+Whenever the user must pick, approve or answer anything, render `templates/decision-page.html`, even for one yes/no and even when they did not ask for HTML. The user answers by clicking, never by typing in the terminal what the page could collect.
 
-- **Header**: the question as h1 ("Which X should we ship?"), the recommendation in one sentence with the reason, a meta line with the round number, date and what happens after the pick.
-- **Your call** (the CTA block): an optional note box and a Copy button. Picking an option copies one line, `Decision "<h1>": option B (<name>). Note: <note>`, for the user to paste back in the chat, and remembers the pick per page.
-- **Options** (`.opts` > `article.opt[data-key][data-name]`): 2-4 side by side (one column on phones). Each has a letter and a short name, a one-line description, a preview, 1-3 pros and cons (`.pc` with `li` / `li.con`), and a Pick button. One option carries a `Recommended` chip.
+- **Header**: the main question as h1 ("Which X should we ship?"), the recommendation in one sentence with the reason, a meta line with the round number, date and what happens after the picks.
+- **Your call** (the CTA block): the questions to answer as `ol.next`, each linked to its section, the recommendation as the muted line.
+- **Questions**: every `.opts[data-q="<question>"]` is one question; the page can hold several (pick a design, approve a plan, choose a name). Add `data-multi` when several picks are allowed (which screens to keep). Yes/no and approvals use the same cards without previews (`data-key="Yes" data-name="ship Friday"`). The template script adds a note box under each question.
+- **Options** (`article.opt[data-key][data-name]` inside `.opts`): 2-4 side by side (one column on phones). Design options have a letter and a short name, a one-line description, a preview, 1-3 pros and cons (`.pc` with `li` / `li.con`), and a Pick button. One option per question carries a `Recommended` chip.
+- **Copy results** (`button.copy-all`, last item in `nav.toc`): pinned right in the sticky top bar, shows `answered/total`, and copies one block to paste back in the chat. Answers and notes are remembered per page.
+
+  ```
+  Answers from "<h1>" (/abs/path/page.html)
+  1. <question>: B (<name>). Note: <note>
+  2. <question>: Yes (ship Friday)
+  3. <question>: no answer
+  ```
 - **Previews show the real thing**: the actual page section with each variant's CSS applied, a screenshot, or a mockup in the product's own style. Same content in every option so only the variable differs.
 - **Compare**: a short sortable table of only the criteria that decide it, with SVG icons.
-- Give the user the page link and say what they'll paste back. When they answer, apply the pick, then update the page: the next round on top, or a "Decided" state.
+- Give the user the page link and say: click your answers, then Copy results and paste it here. When they paste, apply every answer, then update the page: the next round on top, or a "Decided" state.
 
 ## Iterations: the latest is always on top
 

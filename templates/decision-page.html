@@ -146,11 +146,10 @@ summary{cursor:pointer;font-weight:600}details[open] summary{margin-bottom:12px}
 .pc li::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--good)}.pc li.con::before{background:var(--bad)}
 .pick{align-self:flex-start;margin-top:auto;font:inherit;font-size:14px;font-weight:600;padding:8px 18px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
 .pick:hover{border-color:var(--ink)}.opt.on .pick{background:var(--ink);color:var(--surface);border-color:var(--ink)}
-.decide{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:6px 20px 12px}
-.decide textarea{flex:1 1 280px;font:inherit;font-size:14px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-height:40px;resize:vertical;background:var(--surface);color:var(--ink)}
-.decide button{font:inherit;font-size:14px;font-weight:600;padding:8px 16px;border-radius:999px;border:1px solid var(--ink);background:var(--ink);color:var(--surface);cursor:pointer}
-.decide button:disabled{opacity:.35;cursor:default}
-#choice{margin-left:auto;font-size:13px;color:var(--mute);white-space:nowrap}#choice b{color:var(--ink)}
+/* answers: Copy results pinned at the right of the sticky nav; a note box under each question */
+nav.toc .copy-all{flex:none;margin-left:auto;position:sticky;right:0;font:inherit;font-size:13.5px;font-weight:600;padding:6px 14px;border-radius:999px;border:1px solid var(--ink);background:var(--ink);color:var(--surface);cursor:pointer;box-shadow:-14px 0 10px var(--bg)}
+nav.toc .copy-all.done{background:var(--good);border-color:var(--good)}
+.qnote{display:block;width:100%;margin-top:10px;font:inherit;font-size:14px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--surface);color:var(--ink)}
 </style>
 </head>
 <body>
@@ -163,16 +162,19 @@ summary{cursor:pointer;font-weight:600}details[open] summary{margin-bottom:12px}
   </header>
 
   <div class="cta">
-    <div class="cta-h"><b>Your call</b><span>Pick one below. Add a note if you want; it is copied with your pick.</span></div>
-    <div class="decide"><textarea id="note" placeholder="Optional note, e.g. 'B, but with A's header'"></textarea><button id="copy" type="button" disabled>Copy my pick</button><span id="choice">Nothing picked yet</span></div>
+    <div class="cta-h"><b>Your call</b><span>Click your answers below, then Copy results in the top bar and paste it in the chat</span></div>
+    <ol class="next">
+      <li><div><b><a href="#round-2">Which option should we ship?</a></b><span>Recommended: B, because of the one thing that decides it.</span></div></li>
+      <li><div><b><a href="#ship">Ship it this week?</a></b><span>Recommended: yes, once the pick above is in.</span></div></li>
+    </ol>
   </div>
 
-  <nav class="toc"><a class="latest" href="#round-2">Round 2</a><a href="#compare">Compare</a><a href="#earlier">Round 1</a></nav>
+  <nav class="toc"><a class="latest" href="#round-2">Round 2</a><a href="#ship">Ship it?</a><a href="#compare">Compare</a><a href="#earlier">Round 1</a><button class="copy-all" type="button">Copy results</button></nav>
 
   <section id="round-2">
     <div class="dh"><h2>Round 2: the two finalists</h2><span class="chip accent">Latest</span></div>
     <p class="round-meta">YYYY-MM-DD HH:MM · what changed since round 1, in one line</p>
-    <div class="opts">
+    <div class="opts" data-q="Which option should we ship?">
       <article class="opt" data-key="A" data-name="Short name A" id="opt-A">
         <div class="opt-h"><b>A. Short name</b></div>
         <p>One line on what this option is.</p>
@@ -187,6 +189,15 @@ summary{cursor:pointer;font-weight:600}details[open] summary{margin-bottom:12px}
         <ul class="pc"><li>What it does well</li><li class="con">What it costs or risks</li></ul>
         <button class="pick" type="button">Pick B</button>
       </article>
+    </div>
+  </section>
+
+  <section id="ship">
+    <div class="dh"><h2>Ship it this week?</h2></div>
+    <p class="thesis">One line on what shipping now means. Yes/no and approvals use the same cards, without previews.</p>
+    <div class="opts" data-q="Ship it this week?">
+      <article class="opt" data-key="Yes" data-name="ship Friday"><div class="opt-h"><b>Yes, ship Friday</b><span class="chip good">Recommended</span></div><button class="pick" type="button">Pick</button></article>
+      <article class="opt" data-key="No" data-name="wait for round 3"><div class="opt-h"><b>No, wait for round 3</b></div><button class="pick" type="button">Pick</button></article>
     </div>
   </section>
 
@@ -294,32 +305,65 @@ document.querySelectorAll("table:not([data-plain])").forEach((t) => {
 })();
 </script>
 <script>
-/* Decision page: Pick buttons inside .opt[data-key][data-name]; the pick and an optional note are copied as one line to paste back in the chat, and remembered per page. */
+/* Answers: every .opts[data-q] is one question (add data-multi to allow several picks); its .opt[data-key][data-name] cards have Pick buttons.
+   Each question gets a note box. The Copy results button in the sticky nav copies every answer as one block to paste back in the chat.
+   Answers are remembered per page. */
 (() => {
-  const store = `pick:${location.pathname}`;
+  const qs = [...document.querySelectorAll(".opts[data-q]")];
+  const btn = document.querySelector(".copy-all");
+  if (!qs.length || !btn) return;
+  const store = `answers:${location.pathname}`;
+  let saved = {};
+  try { saved = JSON.parse(localStorage.getItem(store)) || {}; } catch {}
   const title = (document.querySelector("h1")?.textContent || document.title).trim();
-  const choice = document.getElementById("choice"), note = document.getElementById("note"), copy = document.getElementById("copy");
-  const opt = (k) => document.querySelector(`.opt[data-key="${k}"]`);
-  let picked = null;
-  const line = () => `Decision "${title}": option ${picked} (${opt(picked).dataset.name})${note && note.value.trim() ? `. Note: ${note.value.trim()}` : ""}`;
-  const send = async () => {
-    if (!picked) return;
-    try { await navigator.clipboard.writeText(line()); choice.innerHTML = `<b>Picked ${picked}: ${opt(picked).dataset.name}</b> · copied, paste it in the chat`; }
-    catch { choice.innerHTML = `<b>Picked ${picked}</b> · copy blocked, type it in the chat`; }
+  const picks = (g) => [...g.querySelectorAll(".opt.on")];
+  const note = (g) => g.nextElementSibling.value.trim();
+  const label = () => { btn.textContent = `Copy results · ${qs.filter((g) => picks(g).length).length}/${qs.length}`; };
+  const save = () => {
+    label();
+    try { localStorage.setItem(store, JSON.stringify(Object.fromEntries(qs.map((g) => [g.dataset.q, { picks: picks(g).map((o) => o.dataset.key), note: note(g) }])))); } catch {}
   };
-  const mark = (k) => {
-    picked = opt(k) ? k : null;
-    for (const o of document.querySelectorAll(".opt[data-key]")) {
-      o.classList.toggle("on", o.dataset.key === picked);
+  const mark = (o, on) => {
+    const b = o.querySelector(".pick");
+    o.classList.toggle("on", on);
+    b.textContent = on ? "Picked" : b.dataset.label;
+    b.setAttribute("aria-pressed", on);
+  };
+  for (const g of qs) {
+    const s = saved[g.dataset.q] || {};
+    const box = Object.assign(document.createElement("input"), { className: "qnote", type: "text", placeholder: "Note (optional)", value: s.note || "" });
+    box.setAttribute("aria-label", `Note on: ${g.dataset.q}`);
+    box.addEventListener("input", save);
+    g.after(box);
+    for (const o of g.querySelectorAll(".opt[data-key]")) {
       const b = o.querySelector(".pick");
-      if (b) b.textContent = o.dataset.key === picked ? "Picked" : `Pick ${o.dataset.key}`;
+      if (!b) continue;
+      b.dataset.label = b.textContent;
+      mark(o, (s.picks || []).includes(o.dataset.key));
+      b.addEventListener("click", () => {
+        const on = !o.classList.contains("on");
+        if (!g.hasAttribute("data-multi")) for (const x of picks(g)) mark(x, false);
+        mark(o, on);
+        save();
+      });
     }
-    if (copy) copy.disabled = !picked;
-    if (choice) choice.innerHTML = picked ? `<b>Picked ${picked}: ${opt(picked).dataset.name}</b>` : "Nothing picked yet";
-  };
-  for (const b of document.querySelectorAll(".opt .pick")) b.addEventListener("click", () => { mark(b.closest(".opt").dataset.key); try { localStorage.setItem(store, picked); } catch {} send(); });
-  copy?.addEventListener("click", send);
-  try { mark(localStorage.getItem(store)); } catch { mark(null); }
+  }
+  const text = () => [
+    `Answers from "${title}" (${decodeURIComponent(location.pathname)})`,
+    ...qs.map((g, i) => {
+      const p = picks(g).map((o) => (o.dataset.name ? `${o.dataset.key} (${o.dataset.name})` : o.dataset.key));
+      return `${i + 1}. ${g.dataset.q}: ${p.length ? p.join(", ") : "no answer"}${note(g) ? `. Note: ${note(g)}` : ""}`;
+    }),
+  ].join("\n");
+  btn.addEventListener("click", async () => {
+    const t = text();
+    try { await navigator.clipboard.writeText(t); }
+    catch { const a = document.createElement("textarea"); a.value = t; document.body.append(a); a.select(); document.execCommand("copy"); a.remove(); }
+    btn.textContent = "Copied, paste it in the chat";
+    btn.classList.add("done");
+    setTimeout(() => { btn.classList.remove("done"); label(); }, 1800);
+  });
+  label();
 })();
 </script>
 </body>
