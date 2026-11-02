@@ -3,7 +3,7 @@
 // and writes full-page screenshots. Run from a folder where @playwright/test (or playwright) resolves.
 // Usage: node check-report.mjs <page.html> [out-dir]
 import { createRequire } from "node:module";
-import { resolve, basename } from "node:path";
+import { resolve, basename, dirname } from "node:path";
 import { mkdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 
@@ -28,7 +28,8 @@ for (const [w, h] of [[1440, 900], [390, 844]]) {
   await page.goto(url);
   await page.waitForTimeout(400);
   const sw = await page.evaluate(() => document.documentElement.scrollWidth);
-  const shot = resolve(out, `${basename(file, ".html")}-${w}.png`);
+  const name = basename(file, ".html") === "index" ? basename(dirname(resolve(file))) : basename(file, ".html"); // folder pages: name after the folder
+  const shot = resolve(out, `${name}-${w}.png`);
   await page.screenshot({ path: shot, fullPage: true });
   const ok = sw <= w && errors.length === 0;
   failed ||= !ok;

@@ -1,6 +1,6 @@
 ---
 name: fix-report
-description: Bring an existing prism page up to the current rules in place - refresh its template style and scripts, then fix what the rules now require (files as links, diagram-design diagrams with hover help, decision pages with Copy results) and re-run the checks. Use when the user says fix, upgrade, tighten or clean up a report, dashboard or decision page, or points at an older page.
+description: Bring an existing prism page up to the current rules in place - refresh its template style and scripts, then fix what the rules now require (files as links, diagram-design diagrams with hover help, picks with Copy results) and re-run the checks. Use when the user says fix, upgrade, tighten or clean up a report, dashboard or decision page, or points at an older page.
 argument-hint: "[page.html | folder | all] [force] [extra fixes]"
 ---
 
@@ -18,16 +18,19 @@ Fix one page in place, or every page in a folder. Same file, same URL, same fact
 - **`force`** (or `--force`), anywhere: redo the whole page on the current template, not only what breaks a rule. Re-lay out every section decision first, rebuild every diagram with diagram-design, tighten every line. Facts, numbers and links still stay.
 - **Anything else**: extra fixes the user wants on top of the rules ("make the Gantt bigger"), applied in step 4.
 - **Several pages**: list them first, one line each, then fix them one at a time.
-- **Safety**: before editing a page that git does not track, or one with uncommitted changes, copy it to a temp folder and say where, so the old version can come back.
+- **Safety**: before the first edit, copy every file this run will write that git does not track or that has uncommitted changes (the page, its generator, and the `index.html` and hub the index script rewrites) to a temp folder, and say where.
 
-1. **Load the rules.** Load the `prism-reports` skill with the Skill tool and read the page. Name its template: decision page when it asks the user to pick or approve, midnight when it is dark, else daylight.
-2. **Generated page? Fix the generator.** If a script next to the page writes it (`gen.py`, `build.mjs`...), make every change below in the script and re-run it. Never hand-edit output that the next run overwrites. If it pins a versioned template path (`.../prism-reports/0.3.4/templates/...`), make it pick the newest installed version so later rebuilds get template fixes on their own.
-3. **Refresh the template parts.** Replace the page's template CSS (from `<style>\n:root` to where the page's own rules start) and its template `<script>` blocks with the current template's. Keep the page's own CSS and scripts unless the template now covers them (path Copy buttons, the old single "Copy my pick" bar, hand-made tooltips).
-4. **Fix against the musts**, only where the page breaks them, then apply the user's extra fixes:
+1. **Load the rules from this plugin version.** Read `${CLAUDE_PLUGIN_ROOT}/skills/prism-reports/SKILL.md` and the references it links (not an older cached copy), then the page. Templates are in `${CLAUDE_PLUGIN_ROOT}/templates/`, scripts in `${CLAUDE_PLUGIN_ROOT}/scripts/`.
+2. **Pick the template.** Decision page when the page asks the user to pick, approve or answer anything (a pick inside a report's Next steps counts: the decision template is the report template plus Pick cards and Copy results). Midnight when the page is dark. Else daylight.
+3. **Generated page? Fix the generator.** If a script next to the page writes it (`gen.py`, `build.mjs`...), make every change in the script and re-run it; never hand-edit output the next run overwrites. Make it read the newest installed template, not a pinned version (`.../prism-reports/0.3.4/templates/...`). Anchor on `<style>\n:root` and the first line-start `<script>`, never on a template demo section. Switching templates changes the back-link label and placeholders: set them again (step 4).
+4. **Refresh the template parts.** Skip when a generator already reads the newest template. Otherwise replace the template CSS (the `<style>` that starts with `:root`, up to the first rule the template does not have) and the template `<script>` blocks with the current template's. Keep the page's own CSS (later rules or separate `<style>` blocks) and scripts unless the template now covers them (path Copy buttons, the old "Copy my pick" bar, hand-made tooltips).
+5. **Fix against the musts**, only where the page breaks them, then apply the user's extra fixes:
    - Decision first: question h1, one-sentence answer, titled Next steps, at most 4 stats.
-   - Files: raw paths, path boxes and Copy buttons become `a.file-link` on the label.
-   - Diagrams: step pills, hand-drawn SVG flows and ASCII art become a diagram-design diagram, inline, in the page's CSS variables. Every step, node and bar gets `data-tip` ("What: ..." and "Why: ..."); `?` popovers become `data-tip`.
-   - Choices: anything the user must pick, approve or answer becomes decision-page questions with Copy results in the sticky bar.
-   - Iterations latest on top, back link to the index (a page that is a folder's `index.html` links `../index.html`, not itself), libraries from a pinned CDN, no em dashes.
-5. **Keep the rest** (skipped with `force`). Don't reword, reorder or restyle what already passes, and never change a number or a fact unless it was wrong.
-6. **Check and hand over.** Run the checks in the `prism-reports` skill (render at 1440px and 390px, hover and tap a diagram step, click every Pick), re-run the index script, then hand over the page link with one line per fix.
+   - Metadata: `<title>`, `report-topic` and `report-date` are real values, never the template's `Topic` or `YYYY-MM-DD HH:MM`. The back link points at its index (`../index.html` when the page is a folder's `index.html`) and is labelled with that index's name.
+   - Files: raw paths, path boxes and Copy buttons become `a.file-link` on the label, including a generator named in the meta line.
+   - Diagrams: step pills, ad-hoc SVG shapes and ASCII art become a diagram-design diagram, inline, in the page's CSS variables. A generated SVG that follows a diagram-design type reference passes. Measured data stays: never drop real bars or rows to fit a type's size limits; keep the type's styling instead.
+   - Hover help: every step, node, bar and row gets `data-tip` ("What: ..." and "Why: ..."); `?` popovers become `data-tip`. Axis lines, moment markers and legends need none.
+   - Choices: every pending pick, approval or open question becomes a decision-page question with Copy results in the sticky bar. In a report, put it in a "Your pick" section right after the nav and link it from its Next step; Next steps keeps its title. Add a `Recommended` chip and pros and cons only when the page already states them; never invent them.
+   - Order: rounds, versions and change-log tables newest first. Libraries from a pinned CDN, no em dashes.
+6. **Keep the rest** (skipped with `force`). Don't reword, reorder or restyle what already passes, and never change a number or a fact unless it was wrong. Flag stale or contradictory data to the user instead of fixing it.
+7. **Check and hand over.** Run every check in the prism-reports `references/checks.md` (render at 1440px and 390px, use every interactive part: hover and tap a diagram step, click every Pick and Copy results, sort a table; one fact one value; the impeccable detector; copy; size). Re-run the index script, then hand over the page, its index and the hub as links, with one line per fix and one per thing left unfixed.
