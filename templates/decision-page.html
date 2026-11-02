@@ -91,7 +91,7 @@ section{margin-top:56px;scroll-margin-top:64px}
 .who{display:flex;align-items:center;gap:10px;min-width:0}
 .who img,.who .av{width:32px;height:32px;border-radius:50%;object-fit:cover;flex:none;background:var(--c7);color:#fff;display:grid;place-items:center;font-size:12px;font-weight:700}
 .who span{display:flex;flex-direction:column;min-width:0}td .who{min-width:200px}.who b{font-weight:600}.who small{color:var(--mute);font-size:12.5px;line-height:1.35}
-/* step path for one chain: <div class="path"><span class="step">You</span><span class="arrow" aria-hidden="true"></span>...</div> */
+/* step path, only for a 2 to 4 step people chain (processes and flows are diagram-design diagrams): <div class="path"><span class="step">You</span><span class="arrow" aria-hidden="true"></span>...</div> */
 .path{display:flex;align-items:center;flex-wrap:wrap;gap:6px}
 .step{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:14px;font-weight:600}
 .step.end{background:var(--good-tint);border-color:transparent;color:var(--good)}
@@ -142,8 +142,8 @@ summary{cursor:pointer;font-weight:600}details[open] summary{margin-bottom:12px}
 .preview{background:var(--soft);border-radius:10px;overflow:hidden;min-height:200px;display:grid;place-items:center;color:var(--mute);font-size:13px;padding:12px;text-align:center}
 .preview img{width:100%;height:auto;display:block}
 .pc{margin:0;padding:0;list-style:none;font-size:14px;display:grid;gap:4px}
-.pc li{display:grid;grid-template-columns:14px 1fr;gap:4px;align-items:baseline}
-.pc li::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--good)}.pc li.con::before{background:var(--bad)}
+.pc li{position:relative;padding-left:18px}
+.pc li::before{content:"";position:absolute;left:0;top:.55em;width:7px;height:7px;border-radius:50%;background:var(--good)}.pc li.con::before{background:var(--bad)}
 .pick{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:auto;font:inherit;font-size:15px;font-weight:600;padding:11px 18px;border-radius:10px;border:1.5px solid var(--ink);background:var(--surface);color:var(--ink);cursor:pointer}
 .pick::before{content:"";flex:none;width:16px;height:16px;box-sizing:border-box;border:1.5px solid currentColor;border-radius:50%;display:grid;place-items:center;font-size:11px;line-height:1}
 .opts[data-multi] .pick::before{border-radius:4px}
@@ -154,6 +154,9 @@ summary{cursor:pointer;font-weight:600}details[open] summary{margin-bottom:12px}
 nav.toc .copy-all{flex:none;margin-left:auto;position:sticky;right:0;font:inherit;font-size:13.5px;font-weight:600;padding:6px 14px;border-radius:999px;border:1px solid var(--ink);background:var(--ink);color:var(--surface);cursor:pointer;box-shadow:-14px 0 10px var(--bg)}
 nav.toc .copy-all.done{background:var(--good);border-color:var(--good)}
 .qnote{display:block;width:100%;margin-top:10px;font:inherit;font-size:14px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--surface);color:var(--ink)}
+/* hover help: data-tip on any element (SVG diagram node, bar, row). Lines "What: ..." / "Why: ..." get a bold label. Opens on hover, keyboard focus or tap. */
+[data-tip]{cursor:help}
+.tip{position:fixed;z-index:50;max-width:min(340px,calc(100vw - 16px));padding:10px 12px;border-radius:10px;background:var(--ink);color:var(--surface);font-size:13px;line-height:1.5;pointer-events:none;box-shadow:0 6px 24px rgba(0,0,0,.18)}.tip div+div{margin-top:4px}
 </style>
 </head>
 <body>
@@ -298,6 +301,41 @@ document.querySelectorAll("table:not([data-plain])").forEach((t) => {
   (t.closest(".tscroll") || t).before(bar);
   apply();
 });
+/* Hover help: every [data-tip] gets a box on hover (mouse), keyboard focus, or tap (tap again or tap elsewhere to close). SVG nodes become focusable. */
+(() => {
+  const els = [...document.querySelectorAll("[data-tip]")];
+  if (!els.length) return;
+  const box = Object.assign(document.createElement("div"), { className: "tip", id: "tip", hidden: true });
+  box.setAttribute("role", "tooltip");
+  document.body.append(box);
+  let cur = null;
+  const show = (el) => {
+    cur = el;
+    box.replaceChildren(...el.dataset.tip.split("\n").map((line) => {
+      const d = document.createElement("div"), m = line.match(/^(\w[\w ]{0,15}):\s*(.*)$/);
+      if (m) d.append(Object.assign(document.createElement("b"), { textContent: `${m[1]}: ` }), m[2]); else d.textContent = line;
+      return d;
+    }));
+    box.hidden = false;
+    const r = el.getBoundingClientRect(), b = box.getBoundingClientRect();
+    box.style.left = `${Math.min(Math.max(8, r.left + r.width / 2 - b.width / 2), innerWidth - b.width - 8)}px`;
+    box.style.top = `${r.top - b.height - 8 > 8 ? r.top - b.height - 8 : r.bottom + 8}px`;
+  };
+  const hide = () => { cur = null; box.hidden = true; };
+  for (const el of els) {
+    if (!el.matches("a,button,input,select,textarea,[tabindex]")) el.setAttribute("tabindex", "0");
+    el.setAttribute("aria-describedby", "tip");
+    let pt = "mouse", was = false;
+    el.addEventListener("pointerenter", (e) => e.pointerType === "mouse" && show(el));
+    el.addEventListener("pointerleave", (e) => e.pointerType === "mouse" && hide());
+    el.addEventListener("pointerdown", (e) => { pt = e.pointerType; was = cur === el; });
+    el.addEventListener("click", () => { if (pt !== "mouse") (was ? hide() : show(el)); });
+    el.addEventListener("focus", () => show(el));
+    el.addEventListener("blur", hide);
+  }
+  addEventListener("scroll", () => cur && show(cur), { passive: true });
+  document.addEventListener("keydown", (e) => e.key === "Escape" && hide());
+})();
 /* Nav: mark the section in view. */
 (() => {
   const links = [...document.querySelectorAll("nav.toc a")];

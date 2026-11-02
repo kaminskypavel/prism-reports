@@ -6,12 +6,21 @@
     "name": "Pavel 'PK' Kaminsky",
     "url": "https://github.com/kaminskypavel"
   },
+  "allowCrossMarketplaceDependenciesOn": [
+    "diagram-design"
+  ],
   "plugins": [
     {
       "name": "prism-reports",
       "description": "One report style, templates, an index of every report, and render checks. Loaded every session by a SessionStart hook.",
       "source": "./",
-      "category": "productivity"
+      "category": "productivity",
+      "dependencies": [
+        {
+          "name": "diagram-design",
+          "marketplace": "diagram-design"
+        }
+      ]
     }
   ]
 }

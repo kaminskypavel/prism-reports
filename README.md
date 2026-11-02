@@ -7,6 +7,7 @@ A Claude Code plugin. Everything an agent shows you becomes one minimal HTML pag
 ## Install
 
 ```sh
+claude plugin marketplace add cathrynlavery/diagram-design   # dependency: every diagram is drawn with it
 claude plugin marketplace add kaminskypavel/prism-reports
 claude plugin install prism-reports@prism-reports
 ```
@@ -18,7 +19,8 @@ A `SessionStart` hook loads these rules into every session:
 - Anything you read to understand, compare, decide or approve is an HTML page. Files agents read stay markdown.
 - Each page answers first, then shows a titled Next steps block, at most 4 stats, the evidence, and an appendix.
 - Pages live in the repo's `docs/reports/`, `docs/design/` or `docs/decisions/`. Each folder gets an index, and `docs/` gets an index of indexes.
-- When you have to choose, you get a decision page with Pick buttons. With several rounds, the latest is on top.
+- When you have to choose, approve or answer, you get a decision page: click your answers, then Copy results and paste it back. With several rounds, the latest is on top.
+- Every flow, timeline or architecture is drawn with [diagram-design](https://github.com/cathrynlavery/diagram-design) in the page's colors. Hover or tap any step for what it does and why.
 - Every page is rendered at desktop and phone width and checked before you see it.
 
 ## Files

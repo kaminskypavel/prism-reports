@@ -28,11 +28,28 @@
 - `.chip` with `.good` `.warn` `.bad` `.accent` (`.plain` drops the dot): status next to an h2 or in a table cell.
 - `.who`: avatar (photo data URI or initials) + name + role, for people in cards and table cells.
 - `.panel`, `.cols` (2-up), `.ph` panel label, `.cap` caption, `.note` soft callout.
-- Charts: `.rb` range/value bars, `.stack` stacked bar, `.tm` treemap, `.grid` tinted verdict cards (`.good` `.warn` `.bad` `.dead`), `.path` + `.step` for one chain, `.nums` numbered cards.
+- Charts: `.rb` range/value bars, `.stack` stacked bar, `.tm` treemap, `.grid` tinted verdict cards (`.good` `.warn` `.bad` `.dead`), `.path` + `.step` only for a 2 to 4 step people chain, `.nums` numbered cards.
 - `.mx` verdict matrix with `.ic` SVG icons (check, cross, question in the template demo). Before any matrix, one line saying what the columns mean; empty cells where "no" is not news.
 - People to act on first: 3-5 cards. Everyone else: a table.
 - Every repo, project, plugin or app named in a page is a link (GitHub URL, site, or file:// for a local repo), in body text, cards, tables and the appendix, not only in a sources list.
 - Every local file a page names (a render, video, image, export, doc) is a plain `<a>` link: href relative to the page (`renders/promo.mp4`), and the link is the label the reader already sees ("Full quality", "Small file for sending"), not an extra line with the file name under it, so right-click > Copy Link works on the label itself. Size or format as muted text after it. Use the template's `a.file-link` (accent blue, bold). Example: `<a class="file-link" href="renders/promo.mp4">Full quality</a> <span class="cap">49 MB</span>`. Never a path in a code box, never Path/Link rows, never Copy buttons for files. Absolute paths appear nowhere on the page; the link already carries them.
+
+## Diagrams
+
+- Every flow, process, timeline, Gantt, sequence, state, tree or architecture is made with the `diagram-design` skill: pick the type there and follow its type reference and layout rules. Never hand-roll step pills or ad-hoc SVG.
+- Embed its SVG inline in a `.panel` of the page, not as a separate file. The page is the skin: do not run diagram-design's onboarding or edit its `style-guide.md`; map its roles to the page's CSS variables so the diagram follows Daylight and Midnight alike.
+
+  | diagram-design role | Page variable |
+  |---|---|
+  | `paper`, `paper-2` | `var(--surface)`, `var(--soft)` |
+  | `ink`, `ink-strong` | `var(--ink)` |
+  | `muted`, `soft` | `var(--mute)` |
+  | `rule`, `rule-solid` | `var(--line)`, `var(--faint)` |
+  | `accent`, `accent-tint`, `link` | `var(--accent)`, `var(--accent-tint)`, `var(--accent)` |
+  | `series-1` to `series-5` | `var(--c1)` to `var(--c5)` |
+  | font | `var(--font)` |
+
+- **Hover help**: every step, node, bar and row worth explaining carries `data-tip`, two lines: `What: <what happens>` and `Why: <why it is there>` (newline as `&#10;`). The template script opens it on hover, keyboard focus or tap, inside SVG too. Put it on the node's `<g>`, not on its text.
 
 ## Tables
 

@@ -19,6 +19,9 @@ grep -q "latest is always on top" "$root/hooks/always.md" || fail "iteration rul
 grep -q "index of indexes" "$root/hooks/always.md" || fail "hub rule missing"
 grep -q "Files are links" "$root/hooks/always.md" || fail "file link rule missing"
 grep -q "Copy results" "$root/hooks/always.md" || fail "copy results rule missing"
+grep -q "diagram-design" "$root/hooks/always.md" || fail "diagram rule missing"
+grep -q '"name": "diagram-design"' "$root/.claude-plugin/marketplace.json" || fail "diagram-design dependency missing"
+for t in daylight-report midnight-report decision-page; do grep -q "data-tip" "$root/templates/$t.html" || fail "$t has no hover help"; done
 grep -q "copy-all" "$root/templates/decision-page.html" || fail "decision page has no Copy results button"
 
 # without CLAUDE_PLUGIN_ROOT it resolves its own install folder
