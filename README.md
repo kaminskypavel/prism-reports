@@ -29,6 +29,7 @@ A `SessionStart` hook loads these rules into every session:
 |---|---|
 | `hooks/always.md` | The rules loaded every session |
 | `skills/prism-reports/` | The full playbook, loaded when a page is built |
+| `skills/fix-report/` | `/prism-reports:fix-report`: brings an older page up to the current rules in place |
 | `templates/` | `daylight-report.html`, `midnight-report.html`, `decision-page.html` |
 | `scripts/reports-index.py` | Builds the indexes |
 | `scripts/check-report.mjs` | Renders a page at 1440px and 390px |
