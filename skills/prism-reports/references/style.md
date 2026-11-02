@@ -38,6 +38,7 @@
 
 - Every flow, process, timeline, Gantt, sequence, state, tree or architecture is made with the `diagram-design` skill: pick the type there and follow its type reference and layout rules. Never hand-roll step pills or ad-hoc SVG.
 - One dataset, one view: never show the same data as a diagram and again as bars, a list or a table. The diagram's `data-tip` carries the detail.
+- One question, one chart: what happened (a measured run) and what would happen (a projection, a what-if) are separate charts, never merged into one to share an axis. When both are about time, draw both as Gantts on the same seconds scale (same start, same width per second) so they compare at a glance.
 - Embed its SVG inline in a `.panel` of the page, not as a separate file. The page is the skin: do not run diagram-design's onboarding or edit its `style-guide.md`; map its roles to the page's CSS variables so the diagram follows Daylight and Midnight alike.
 
   | diagram-design role | Page variable |
