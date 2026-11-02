@@ -28,7 +28,7 @@
 - `.chip` with `.good` `.warn` `.bad` `.accent` (`.plain` drops the dot): status next to an h2 or in a table cell.
 - `.who`: avatar (photo data URI or initials) + name + role, for people in cards and table cells.
 - `.panel`, `.cols` (2-up), `.ph` panel label, `.cap` caption, `.note` soft callout.
-- Charts: `.rb` range/value bars, `.stack` stacked bar, `.tm` treemap, `.grid` tinted verdict cards (`.good` `.warn` `.bad` `.dead`), `.path` + `.step` only for a 2 to 4 step people chain, `.nums` numbered cards.
+- Charts: `.rb` range/value bars (independent values on one scale only; bars that follow each other in time or add up to a total are a diagram-design Gantt or waterfall), `.stack` stacked bar, `.tm` treemap, `.grid` tinted verdict cards (`.good` `.warn` `.bad` `.dead`), `.path` + `.step` only for a 2 to 4 step people chain, `.nums` numbered cards.
 - `.mx` verdict matrix with `.ic` SVG icons (check, cross, question in the template demo). Before any matrix, one line saying what the columns mean; empty cells where "no" is not news.
 - People to act on first: 3-5 cards. Everyone else: a table.
 - Every repo, project, plugin or app named in a page is a link (GitHub URL, site, or file:// for a local repo), in body text, cards, tables and the appendix, not only in a sources list.
