@@ -1,6 +1,6 @@
 {
   "name": "prism-reports",
-  "version": "0.3.9",
+  "version": "0.3.10",
   "description": "Minimal, decision-first HTML reports, dashboards and decision pages: one style, templates, an index of every report, and render checks before handover.",
   "author": {
     "name": "Pavel 'PK' Kaminsky",
