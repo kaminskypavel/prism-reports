@@ -39,7 +39,7 @@ from pathlib import Path
 FLOW = "display:inline-block;margin:16px 0 0 16px;"
 FIXED = "position:fixed;bottom:12px;left:12px;z-index:2147483647;opacity:.92;"
 BACK = (
-    '<a class="report-back" dir="ltr" href="{href}" style="{place}'
+    '<a class="report-back" dir="ltr" href="{href}" target="_blank" rel="noopener" style="{place}'
     "padding:6px 14px;border-radius:999px;background:#141414;color:#fff;text-decoration:none;"
     'font:600 13px/1.4 -apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,sans-serif">&larr; All {label}</a>'
 )
@@ -114,7 +114,7 @@ def build_hub(hub: Path) -> None:
         latest = re.search(r"latest ([^·<]*?) ·", src)
         a, b = GRADIENTS[len(tiles) % len(GRADIENTS)]
         tiles.append(
-            f'<a class="tile" style="background:linear-gradient(180deg,{a},{b})" href="{E(rel)}/index.html">'
+            f'<a class="tile" style="background:linear-gradient(180deg,{a},{b})" href="{E(rel)}/index.html" target="_blank" rel="noopener">'
             f'<span class="v">{E(rel.replace("/", " / ").capitalize())}</span>'
             f'<small>{n.group(1) if n else "?"} item{"" if n and n.group(1) == "1" else "s"} · latest {E(latest.group(1).strip()) if latest else "?"}</small></a>'
         )
@@ -189,7 +189,7 @@ def main() -> None:
         f'<button data-t="{E(t)}"><i style="background:{color[t]}"></i>{E(t)} <b>{sum(r["topic"] == t for r in rows)}</b></button>' for t in names
     )
     trs = "".join(
-        f'<tr data-t="{E(r["topic"])}"><td class="d">{E(r["date"])}</td><td dir="auto"><a href="{E(r["href"])}">{E(r["title"])}</a></td>'
+        f'<tr data-t="{E(r["topic"])}"><td class="d">{E(r["date"])}</td><td dir="auto"><a href="{E(r["href"])}" target="_blank" rel="noopener">{E(r["title"])}</a></td>'
         f'<td><span class="tp" style="background:{color[r["topic"]]}">{E(r["topic"])}</span></td></tr>'
         for r in rows
     )

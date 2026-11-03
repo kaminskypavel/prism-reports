@@ -22,6 +22,7 @@ grep -q "Copy results" "$root/hooks/always.md" || fail "copy results rule missin
 grep -q "diagram-design" "$root/hooks/always.md" || fail "diagram rule missing"
 grep -q '"name": "diagram-design"' "$root/.claude-plugin/marketplace.json" || fail "diagram-design dependency missing"
 [ -f "$root/skills/fix-report/SKILL.md" ] || fail "fix-report skill missing"
+for t in daylight-report midnight-report decision-page; do grep -q 'a.target = "_blank"' "$root/templates/$t.html" || fail "$t links do not open in a new tab"; done
 for t in daylight-report midnight-report decision-page; do grep -q "data-tip" "$root/templates/$t.html" || fail "$t has no hover help"; done
 grep -q "copy-all" "$root/templates/decision-page.html" || fail "decision page has no Copy results button"
 

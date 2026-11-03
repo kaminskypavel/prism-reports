@@ -7,7 +7,7 @@
 3. **Stats** (`.stats` / `.stat`): at most 4 small cards inside one white frame, ink numbers, each card on its own faint hue so they read apart: slate, teal, blue, amber by position, or by meaning with `.good` (teal), `.warn` (amber), `.bad` (pink). Each links to its section. The first stat is the decision's key number. Cost and run metadata go in the meta line, never in a stat. Skip the strip when the answer is a person or a choice, not a number.
 4. **Sticky nav** (`nav.toc`): one scrolling row with every section plus Appendix; the template script marks the section in view. Round links carry `.latest` on the newest.
 5. **Evidence sections**: question-style h2, an optional status chip, a one-line thesis, then panels. Order by what the reader needs to act, not by how the research went.
-6. **Appendix** (`<details>`): funnels, method, sources, caveats, secondary matrices, run files. Nothing the reader needs to act lives only here.
+6. **Appendix** (`<details>`): funnels, method, sources, caveats, secondary matrices, run files. Nothing the reader needs to act lives only here. Technical tables at the end of a page (runs, change logs, raw data, full lists) sit in a closed `<details>`, never `open`, with a summary naming the table and its row count ("All runs · 12").
 
 ## Look
 
@@ -31,6 +31,7 @@
 - Charts: `.rb` range/value bars (independent values on one scale only; bars that follow each other in time or add up to a total are a diagram-design Gantt or waterfall), `.stack` stacked bar, `.tm` treemap, `.grid` tinted verdict cards (`.good` `.warn` `.bad` `.dead`), `.path` + `.step` only for a 2 to 4 step people chain, `.nums` numbered cards.
 - `.mx` verdict matrix with `.ic` SVG icons (check, cross, question in the template demo). Before any matrix, one line saying what the columns mean; empty cells where "no" is not news.
 - People to act on first: 3-5 cards. Everyone else: a table.
+- Every link that leaves the page opens in a new tab so the reader keeps the report; the template script sets `target="_blank"` on every non-`#` link, so don't fight it. In-page jumps stay put.
 - Every repo, project, plugin or app named in a page is a link (GitHub URL, site, or file:// for a local repo), in body text, cards, tables and the appendix, not only in a sources list.
 - Every local file a page names (a render, video, image, export, doc) is a plain `<a>` link: href relative to the page (`renders/promo.mp4`), and the link is the label the reader already sees ("Full quality", "Small file for sending"), not an extra line with the file name under it, so right-click > Copy Link works on the label itself. Size or format as muted text after it. Use the template's `a.file-link` (accent blue, bold). Example: `<a class="file-link" href="renders/promo.mp4">Full quality</a> <span class="cap">49 MB</span>`. Never a path in a code box, never Path/Link rows, never Copy buttons for files. Absolute paths appear nowhere on the page; the link already carries them.
 

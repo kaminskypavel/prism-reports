@@ -204,7 +204,7 @@ summary{cursor:pointer;font-weight:600}details[open] summary{margin-bottom:12px}
 
   <section id="appendix">
     <div class="dh"><h2>Appendix</h2></div>
-    <details open><summary>Full table</summary><table><thead><tr><th>Col</th><th>Col</th></tr></thead><tbody><tr><td>…</td><td>…</td></tr></tbody></table></details>
+    <details><summary>Full table · 1 row</summary><table><thead><tr><th>Col</th><th>Col</th></tr></thead><tbody><tr><td>…</td><td>…</td></tr></tbody></table></details>
     <details><summary>Method, sources and caveats</summary><div class="src"><a href="https://example.com">Source</a></div></details>
   </section>
 </div>
@@ -284,6 +284,8 @@ document.querySelectorAll("table:not([data-plain])").forEach((t) => {
   (t.closest(".tscroll") || t).before(bar);
   apply();
 });
+/* Links that leave the page open in a new tab, so the report stays open behind them. In-page jumps (#...) stay put. */
+for (const a of document.querySelectorAll('a[href]:not([href^="#"])')) { a.target = "_blank"; a.rel = "noopener"; }
 /* Hover help: every [data-tip] gets a box on hover (mouse), keyboard focus, or tap (tap again or tap elsewhere to close). SVG nodes become focusable. */
 (() => {
   const els = [...document.querySelectorAll("[data-tip]")];
