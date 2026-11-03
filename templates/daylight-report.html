@@ -12,7 +12,7 @@
 <meta name="report-date" content="YYYY-MM-DD HH:MM">
 <style>
 :root{
-  --bg:#f3f3f0;--surface:#fff;--soft:#f7f7f4;--ink:#141414;--mute:#5c5c56;--faint:#8a8a84;--line:#e2e2dc;--track:#ecece8;
+  --bg:#f5f5f2;--surface:#fff;--soft:#f7f7f4;--ink:#141414;--mute:#5c5c56;--faint:#8a8a84;--line:#e2e2dc;--track:#ecece8;
   --accent:#2440e8;--accent-tint:#eaedfd;
   --good:#0f766e;--good-tint:#e6f3f1;--warn:#ad4f08;--warn-tint:#fbf1e4;--bad:#be185d;--bad-tint:#fbe9f1;--dead:#e11d48;
   /* categorical series for charts only (dark enough for white labels): */
@@ -29,41 +29,41 @@ a{color:inherit;text-decoration-color:var(--faint);text-underline-offset:3px}a:h
 /* local file link: <a class="file-link" href="renders/promo.mp4">Full quality</a> */
 a.file-link{color:var(--accent);font-weight:600}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
-.wrap{max-width:1180px;margin:0 auto;padding:36px 32px 96px}
-h1{font-size:36px;line-height:1.12;letter-spacing:-.025em;margin:0;font-weight:700;text-wrap:balance}
-h2{font-size:24px;line-height:1.2;letter-spacing:-.02em;margin:0;font-weight:700;text-wrap:balance}
+.wrap{max-width:1120px;margin:0 auto;padding:30px 32px 96px}
+h1{font-size:32px;line-height:1.12;letter-spacing:-.022em;margin:0;font-weight:700;text-wrap:balance}
+h2{font-size:20px;line-height:1.2;letter-spacing:-.015em;margin:0;font-weight:700;text-wrap:balance}
 h3{font-size:16px;margin:0 0 8px}
-.lede{font-size:18px;line-height:1.45;max-width:70ch;margin:10px 0 6px;font-weight:500}
-.sub{color:var(--mute);font-size:13.5px;margin:0}
+.lede{font-size:17px;line-height:1.5;max-width:66ch;margin:10px 0 8px}
+.sub{color:var(--mute);font-size:12.5px;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sub.open{white-space:normal}
 .chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;line-height:1;padding:5px 9px;border-radius:999px;background:var(--soft);color:var(--mute);white-space:nowrap}
 .chip::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
 .chip.good{background:var(--good-tint);color:var(--good)}.chip.warn{background:var(--warn-tint);color:var(--warn)}.chip.bad{background:var(--bad-tint);color:var(--bad)}.chip.accent{background:var(--accent-tint);color:var(--accent)}
 .chip.plain::before{display:none}
-/* call to action: a titled block with a stronger ink border, no color; 1-3 numbered asks right under the answer */
-.cta{margin:26px 0 0;padding:0 0 6px;background:var(--surface);border:1.5px solid var(--ink);border-radius:var(--radius);overflow:hidden}
-.cta-h{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 10px;padding:16px 20px 2px}.cta-h b{font-size:17px;letter-spacing:-.01em}.cta-h span{font-size:13px;color:var(--mute)}
+/* call to action: a titled block with an ink border, no color; 1-3 numbered asks right under the answer, one line each */
+.cta{margin:20px 0 0;padding:0 0 4px;background:var(--surface);border:1px solid var(--ink);border-radius:var(--radius);overflow:hidden}
+.cta-h{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 10px;padding:13px 18px 3px}.cta-h b{font-size:15px;letter-spacing:-.01em}.cta-h span{font-size:12.5px;color:var(--mute)}
 .next{margin:0;padding:0;list-style:none;counter-reset:n}
-.next li{display:grid;grid-template-columns:28px 1fr;gap:14px;padding:14px 20px;counter-increment:n}
+.next li{display:grid;grid-template-columns:22px 1fr;gap:12px;padding:9px 18px;align-items:baseline;counter-increment:n}
 .next li+li{border-top:1px solid var(--line)}
-.next li::before{content:counter(n);width:28px;height:28px;border-radius:50%;background:var(--ink);color:var(--surface);display:grid;place-items:center;font-weight:700;font-size:13px}
-.next b{display:block;font-size:15.5px}.next span{color:var(--mute);font-size:14px}
-/* stat strip: at most 4 cards, ink numbers, each on its own faint hue so they read apart; .good .warn .bad pick the hue by meaning */
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin:14px 0 0;padding:8px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius)}
-.stat{padding:14px 16px;border-radius:10px;text-decoration:none;display:block;background:var(--tint-slate)}
-.stat:nth-child(4n+2){background:var(--tint-teal)}.stat:nth-child(4n+3){background:var(--tint-blue)}.stat:nth-child(4n){background:var(--tint-amber)}
-.stat.good{background:var(--tint-teal)}.stat.warn{background:var(--tint-amber)}.stat.bad{background:var(--tint-pink)}
-.stat .n{display:block;font-size:28px;font-weight:700;letter-spacing:-.02em;line-height:1.15}.stat .l{display:block;font-size:13px;color:var(--mute);margin-top:2px}
+.next li::before{content:counter(n);width:22px;height:22px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--ink);color:var(--ink);display:grid;place-items:center;font-weight:700;font-size:12px;align-self:start}
+.next b{font-size:14.5px}.next span{color:var(--mute);font-size:13.5px;margin-left:8px}
+/* stat strip: at most 4 cards, ink numbers, each on its own faint hue over white so they read apart; .good .warn .bad pick the hue by meaning */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:12px 0 0}
+.stat{padding:12px 14px;border-radius:10px;text-decoration:none;display:block;background:linear-gradient(var(--tint-slate),var(--tint-slate)) var(--surface)}
+.stat:nth-child(4n+2){background:linear-gradient(var(--tint-teal),var(--tint-teal)) var(--surface)}.stat:nth-child(4n+3){background:linear-gradient(var(--tint-blue),var(--tint-blue)) var(--surface)}.stat:nth-child(4n){background:linear-gradient(var(--tint-amber),var(--tint-amber)) var(--surface)}
+.stat.good{background:linear-gradient(var(--tint-teal),var(--tint-teal)) var(--surface)}.stat.warn{background:linear-gradient(var(--tint-amber),var(--tint-amber)) var(--surface)}.stat.bad{background:linear-gradient(var(--tint-pink),var(--tint-pink)) var(--surface)}
+.stat .n{display:block;font-size:24px;font-weight:700;letter-spacing:-.02em;line-height:1.15}.stat .l{display:block;font-size:12.5px;color:var(--mute);margin-top:2px}
 a.stat:hover .l{color:var(--ink)}
 /* nav: one scrolling row, active section marked */
-nav.toc{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;margin:28px -32px 0;padding:10px 32px;position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--line)}
+nav.toc{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;margin:20px -32px 0;padding:10px 32px;position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--line)}
 nav.toc::-webkit-scrollbar{display:none}
 nav.toc a{flex:none;text-decoration:none;font-size:13.5px;font-weight:600;color:var(--mute);padding:6px 12px;border-radius:999px}
 nav.toc a:hover{color:var(--ink);background:var(--surface)}nav.toc a.on{color:var(--ink);background:var(--surface);box-shadow:inset 0 0 0 1px var(--line)}
 /* sections + panels */
-section{margin-top:56px;scroll-margin-top:64px}
+section{margin-top:44px;scroll-margin-top:64px}
 .dh{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.thesis{font-size:15.5px;max-width:75ch;margin:6px 0 16px;color:var(--mute)}
-.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px 22px}
+.thesis{font-size:14px;max-width:75ch;margin:4px 0 14px;color:var(--mute)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px}
 .panel+.panel,.cols+.panel,.panel+.cols,.cols+.cols{margin-top:14px}
 .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px}.cols>.panel{margin-top:0}
 .ph{font-size:13px;color:var(--mute);font-weight:600;margin-bottom:14px}
@@ -124,11 +124,11 @@ th[aria-sort=ascending]::after{transform:rotate(-135deg) translateY(-1px);opacit
 nav.toc a.latest::after{content:"latest";margin-left:6px;font-size:11px;font-weight:700;color:var(--accent)}
 .round-meta{font-size:13px;color:var(--mute);margin:2px 0 14px}
 /* appendix */
-details{border-top:1px solid var(--line);padding:14px 0}details:last-child{border-bottom:1px solid var(--line)}
+details{border-top:1px solid var(--line);padding:12px 0}details:last-child{border-bottom:1px solid var(--line)}
 summary{cursor:pointer;font-weight:600}details[open] summary{margin-bottom:12px}
 .src{font-size:13.5px;line-height:1.9;color:var(--mute)}
 @media (max-width:640px){
-  .wrap{padding:24px 16px 64px}h1{font-size:28px}.lede{font-size:16.5px}h2{font-size:21px}
+  .wrap{padding:24px 16px 64px}h1{font-size:28px}.lede{font-size:16.5px}h2{font-size:19px}
   nav.toc{margin:22px -16px 0;padding:8px 16px}
   .stats{grid-template-columns:1fr 1fr}
   .rb{grid-template-columns:110px 1fr 64px;gap:10px}.panel{padding:16px}
@@ -137,6 +137,10 @@ summary{cursor:pointer;font-weight:600}details[open] summary{margin-bottom:12px}
 /* hover help: data-tip on any element (SVG diagram node, bar, row). Lines "What: ..." / "Why: ..." get a bold label. Opens on hover, keyboard focus or tap. */
 [data-tip]{cursor:help}
 .tip{position:fixed;z-index:50;max-width:min(340px,calc(100vw - 16px));padding:10px 12px;border-radius:10px;background:var(--ink);color:var(--surface);font-size:13px;line-height:1.5;pointer-events:none;box-shadow:0 6px 24px rgba(0,0,0,.18)}.tip div+div{margin-top:4px}
+/* facelift motion: the nav marker slides; a stat lifts on hover (the script at the end; nothing waits on it) */
+a.stat{transition:transform .2s cubic-bezier(.16,1,.3,1)}a.stat:hover{transform:translateY(-2px)}
+nav.toc.slide a.on{background:none;box-shadow:none}
+nav.toc .pill{position:absolute;top:10px;left:0;height:31px;border-radius:999px;background:var(--surface);box-shadow:inset 0 0 0 1px var(--line);z-index:-1;pointer-events:none;opacity:0}
 </style>
 </head>
 <body>
@@ -329,6 +333,41 @@ for (const a of document.querySelectorAll('a[href]:not([href^="#"])')) { a.targe
     for (const e of es) if (e.isIntersecting) for (const a of links) a.classList.toggle("on", a.hash === `#${e.target.id}`);
   }, { rootMargin: "-35% 0px -60% 0px" });
   for (const s of document.querySelectorAll("section[id]")) io.observe(s);
+})();
+</script>
+<script>
+/* Facelift motion (Motion from the pinned CDN). Nothing is hidden waiting for it; it only moves what is already on screen.
+   The meta line under the answer shows one line; a click shows all of it. */
+(() => {
+  const sub = document.querySelector(".sub");
+  if (sub && sub.scrollWidth > sub.clientWidth) { sub.title = "Show all"; sub.style.cursor = "pointer"; sub.addEventListener("click", () => sub.classList.add("open")); }
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  import("https://cdn.jsdelivr.net/npm/motion@14.9.0/+esm").then(({ animate }) => {
+    const ease = [0.16, 1, 0.3, 1], spring = { type: "spring", bounce: 0.2, duration: 0.45 };
+    const nav = document.querySelector("nav.toc");
+    if (nav) {
+      const pill = Object.assign(document.createElement("i"), { className: "pill" });
+      nav.prepend(pill); nav.classList.add("slide");
+      let first = true;
+      const move = () => {
+        const a = nav.querySelector("a.on");
+        if (!a) return animate(pill, { opacity: 0 }, { duration: 0.15 });
+        const to = { x: a.offsetLeft, width: a.offsetWidth, opacity: 1 };
+        if (first) Object.assign(pill.style, { transform: `translateX(${to.x}px)`, width: `${to.width}px`, opacity: 1 }); else animate(pill, to, spring);
+        first = false;
+      };
+      new MutationObserver(move).observe(nav, { attributes: true, subtree: true, attributeFilter: ["class"] });
+      move();
+    }
+    for (const d of document.querySelectorAll("details")) d.addEventListener("toggle", () => {
+      if (d.open) animate([...d.children].filter((c) => c.tagName !== "SUMMARY"), { opacity: [0, 1], y: [-6, 0] }, { duration: 0.35, ease });
+    });
+    addEventListener("hashchange", () => {
+      const s = document.getElementById(decodeURIComponent(location.hash.slice(1))); if (!s) return;
+      const t = s.querySelector(".panel, .opts, table, svg") || s;
+      setTimeout(() => animate(t, { boxShadow: ["0 0 0 4px rgba(36,64,232,.22)", "0 0 0 0 rgba(36,64,232,0)"] }, { duration: 1.1, ease }), 350);
+    });
+  }).catch(() => {});
 })();
 </script>
 </body>

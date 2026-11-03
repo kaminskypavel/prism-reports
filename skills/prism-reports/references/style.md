@@ -32,6 +32,8 @@
 - `.mx` verdict matrix with `.ic` SVG icons (check, cross, question in the template demo). Before any matrix, one line saying what the columns mean; empty cells where "no" is not news.
 - People to act on first: 3-5 cards. Everyone else: a table.
 - Every link that leaves the page opens in a new tab so the reader keeps the report; the template script sets `target="_blank"` on every non-`#` link, so don't fight it. In-page jumps stay put.
+- Motion: the template's last script loads Motion from the pinned CDN and only moves what is already on screen (the nav marker slides, opened details ease in, a jump target pulses once). Keep it; never hide content waiting for an animation.
+- The meta line under the answer (`.sub`) shows one line and expands on click, so keep the important facts in the lede, not in the meta line.
 - Every repo, project, plugin or app named in a page is a link (GitHub URL, site, or file:// for a local repo), in body text, cards, tables and the appendix, not only in a sources list.
 - Every local file a page names (a render, video, image, export, doc) is a plain `<a>` link: href relative to the page (`renders/promo.mp4`), and the link is the label the reader already sees ("Full quality", "Small file for sending"), not an extra line with the file name under it, so right-click > Copy Link works on the label itself. Size or format as muted text after it. Use the template's `a.file-link` (accent blue, bold). Example: `<a class="file-link" href="renders/promo.mp4">Full quality</a> <span class="cap">49 MB</span>`. Never a path in a code box, never Path/Link rows, never Copy buttons for files. Absolute paths appear nowhere on the page; the link already carries them.
 

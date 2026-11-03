@@ -26,6 +26,7 @@ for t in daylight-report midnight-report decision-page; do grep -q 'a.target = "
 for t in daylight-report midnight-report decision-page; do grep -q "data-tip" "$root/templates/$t.html" || fail "$t has no hover help"; done
 grep -q "copy-all" "$root/templates/decision-page.html" || fail "decision page has no Copy results button"
 grep -q "close-tab" "$root/templates/decision-page.html" || fail "decision page has no Close tab toast"
+for t in daylight-report midnight-report decision-page; do grep -q "Facelift motion" "$root/templates/$t.html" || fail "$t has no facelift motion script"; done
 
 # without CLAUDE_PLUGIN_ROOT it resolves its own install folder
 out2=$(sh "$root/hooks/prism-activate.sh")
