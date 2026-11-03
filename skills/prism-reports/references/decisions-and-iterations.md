@@ -8,7 +8,7 @@ Whenever the user must pick, approve or answer anything, render `templates/decis
 - **Your call** (the CTA block): the questions to answer as `ol.next`, each linked to its section, the recommendation as the muted line.
 - **Questions**: every `.opts[data-q="<question>"]` is one question; the page can hold several (pick a design, approve a plan, choose a name). Add `data-multi` when several picks are allowed (which screens to keep). Yes/no and approvals use the same cards without previews (`data-key="Yes" data-name="ship Friday"`). The template script adds a note box under each question.
 - **Options** (`article.opt[data-key][data-name]` inside `.opts`): 2-4 side by side (one column on phones). Design options have a letter and a short name, a one-line description, a preview, 1-3 pros and cons (`.pc` with `li` / `li.con`), and a Pick button. When there is a recommendation, that option carries a `Recommended` chip. Pros and cons only when known; never invent them to fill a card.
-- **Copy results** (`button.copy-all`, last item in `nav.toc`): pinned right in the sticky top bar, shows `answered/total`, and copies one block to paste back in the chat. Answers and notes are remembered per page.
+- **Copy results** (`button.copy-all`, last item in `nav.toc`): pinned right in the sticky top bar, shows `answered/total`, and copies one block to paste back in the chat. Answers and notes are remembered per page. After a copy, a toast springs in (Motion from the pinned CDN, loaded on the first pick; plain when offline or with reduced motion) with **Close tab**: it closes the tab when the browser allows it (a page opened from the terminal is allowed) and otherwise names the shortcut. Keep the toast script as it is.
 
   ```
   Answers from "<h1>" (/abs/path/page.html)

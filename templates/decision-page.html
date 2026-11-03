@@ -153,6 +153,10 @@ summary{cursor:pointer;font-weight:600}details[open] summary{margin-bottom:12px}
 /* answers: Copy results pinned at the right of the sticky nav; a note box under each question */
 nav.toc .copy-all{flex:none;margin-left:auto;position:sticky;right:0;font:inherit;font-size:13.5px;font-weight:600;padding:6px 14px;border-radius:999px;border:1px solid var(--ink);background:var(--ink);color:var(--surface);cursor:pointer;box-shadow:-14px 0 10px var(--bg)}
 nav.toc .copy-all.done{background:var(--good);border-color:var(--good)}
+/* after Copy results: a toast with a Close tab button; springs in with Motion (pinned CDN, loaded on first copy), plain show when offline or reduced motion */
+.done-toast{position:fixed;left:0;right:0;bottom:20px;margin:0 auto;width:max-content;max-width:calc(100vw - 24px);z-index:40;display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;padding:10px 10px 10px 16px;border-radius:14px;background:var(--ink);color:var(--surface);font-size:14px;box-shadow:0 10px 30px rgba(0,0,0,.22)}
+.done-toast[hidden]{display:none}.done-toast button{font:inherit;font-size:14px;font-weight:600;padding:8px 14px;border-radius:10px;border:0;cursor:pointer}
+.done-toast .close-tab{background:var(--surface);color:var(--ink)}.done-toast .keep{background:none;color:var(--surface);text-decoration:underline;text-underline-offset:3px}
 .qnote{display:block;width:100%;margin-top:10px;font:inherit;font-size:14px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--surface);color:var(--ink)}
 /* hover help: data-tip on any element (SVG diagram node, bar, row). Lines "What: ..." / "Why: ..." get a bold label. Opens on hover, keyboard focus or tap. */
 [data-tip]{cursor:help}
@@ -389,6 +393,7 @@ for (const a of document.querySelectorAll('a[href]:not([href^="#"])')) { a.targe
         if (!g.hasAttribute("data-multi")) for (const x of picks(g)) mark(x, false);
         mark(o, on);
         save();
+        motion();
       });
     }
   }
@@ -406,7 +411,36 @@ for (const a of document.querySelectorAll('a[href]:not([href^="#"])')) { a.targe
     btn.textContent = "Copied, paste it in the chat";
     btn.classList.add("done");
     setTimeout(() => { btn.classList.remove("done"); label(); }, 1800);
+    toast();
   });
+  /* After a copy: a toast with Close tab. Browsers let a page close only a tab it opened or one with a single history entry
+     (a page opened from the terminal is one), so when the tab stays open the button names the shortcut instead. */
+  let box, lib;
+  const motion = () => (lib ??= matchMedia("(prefers-reduced-motion: reduce)").matches ? Promise.resolve(null)
+    : import("https://cdn.jsdelivr.net/npm/motion@14.9.0/+esm").catch(() => null));
+  const toast = async () => {
+    if (!box) {
+      box = Object.assign(document.createElement("div"), { className: "done-toast", hidden: true });
+      box.setAttribute("role", "status");
+      box.innerHTML = '<span>Copied. Paste it in the chat, then close this tab.</span><button class="close-tab" type="button">Close tab</button><button class="keep" type="button">Keep open</button>';
+      document.body.append(box);
+      box.querySelector(".close-tab").addEventListener("click", (e) => {
+        window.close();
+        setTimeout(() => { e.target.textContent = /Mac|iP/.test(navigator.platform) ? "Press \u2318W to close" : "Press Ctrl+W to close"; }, 300);
+      });
+      box.querySelector(".keep").addEventListener("click", async () => {
+        const m = await motion();
+        if (m) await m.animate(box, { opacity: 0, y: 16 }, { duration: 0.18 });
+        box.hidden = true;
+      });
+    }
+    if (!box.hidden) return;
+    const m = await motion();
+    box.hidden = false;
+    if (!m) return;
+    m.animate(box, { y: [28, 0], scale: [0.94, 1] }, { type: "spring", bounce: 0.35, duration: 0.55 });
+    m.animate(box, { opacity: [0, 1] }, { duration: 0.2 });
+  };
   label();
 })();
 </script>

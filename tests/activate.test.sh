@@ -25,6 +25,7 @@ grep -q '"name": "diagram-design"' "$root/.claude-plugin/marketplace.json" || fa
 for t in daylight-report midnight-report decision-page; do grep -q 'a.target = "_blank"' "$root/templates/$t.html" || fail "$t links do not open in a new tab"; done
 for t in daylight-report midnight-report decision-page; do grep -q "data-tip" "$root/templates/$t.html" || fail "$t has no hover help"; done
 grep -q "copy-all" "$root/templates/decision-page.html" || fail "decision page has no Copy results button"
+grep -q "close-tab" "$root/templates/decision-page.html" || fail "decision page has no Close tab toast"
 
 # without CLAUDE_PLUGIN_ROOT it resolves its own install folder
 out2=$(sh "$root/hooks/prism-activate.sh")
