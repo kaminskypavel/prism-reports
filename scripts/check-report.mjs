@@ -32,10 +32,11 @@ for (const [w, h] of [[1440, 900], [390, 844]]) {
   if (w > 500) errors.push(...await page.evaluate(() => {
     if (!document.querySelector(".cta")) return [];
     const words = (el) => el.textContent.split(/\s+/).filter((x) => /[\p{L}\p{N}]/u.test(x)).length;
-    const n = document.querySelectorAll(".cta .one").length;
+    const own = (sel) => [...document.querySelectorAll(sel)].filter((el) => !el.closest(".preview")); // previews show the product, not the page
+    const n = own(".cta .one").length;
     const out = n === 1 ? [] : [`budget: the .cta needs exactly one p.one (the One thing), found ${n}`];
     for (const [sel, cap] of [[".one", 15], [".lede", 25], [".next li", 14], [".thesis", 20]])
-      for (const el of document.querySelectorAll(sel)) if (words(el) > cap) out.push(`budget: ${sel} has ${words(el)} words, cap ${cap}: "${el.textContent.trim().slice(0, 70)}"`);
+      for (const el of own(sel)) if (words(el) > cap) out.push(`budget: ${sel} has ${words(el)} words, cap ${cap}: "${el.textContent.trim().slice(0, 70)}"`);
     return out;
   }));
   const name = basename(file, ".html") === "index" ? basename(dirname(resolve(file))) : basename(file, ".html"); // folder pages: name after the folder
