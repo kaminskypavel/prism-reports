@@ -30,6 +30,7 @@ grep -q "done-toast" "$root/templates/decision-page.html" && fail "decision page
 grep -q "One thing" "$root/hooks/always.md" || fail "one thing rule missing"
 for t in daylight-report midnight-report decision-page; do grep -q '<p class="one"><mark>' "$root/templates/$t.html" || fail "$t has no highlighted One thing"; done
 grep -q "next-q" "$root/templates/decision-page.html" || fail "decision page has no Next question button"
+for t in daylight-report midnight-report decision-page; do grep -q "history.replaceState" "$root/templates/$t.html" || fail "$t in-page jumps add history (blocks Close tab)"; done
 for t in daylight-report midnight-report decision-page; do awk '/<div class="wrap">/{getline n; if (n !~ /report-back/) exit 1; exit 0}' "$root/templates/$t.html" || fail "$t back link is outside the content column"; done
 grep -q "budget:" "$root/scripts/check-report.mjs" || fail "check-report has no word budget"
 for t in daylight-report midnight-report decision-page; do grep -q "Facelift motion" "$root/templates/$t.html" || fail "$t has no facelift motion script"; done

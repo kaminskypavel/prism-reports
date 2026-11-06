@@ -322,6 +322,19 @@ document.querySelectorAll("table:not([data-plain])").forEach((t) => {
 });
 /* Links that leave the page open in a new tab, so the report stays open behind them. In-page jumps (#...) stay put. */
 for (const a of document.querySelectorAll('a[href]:not([href^="#"])')) { a.target = "_blank"; a.rel = "noopener"; }
+/* In-page jumps (#...) scroll without adding a history entry: a tab with one entry is one a page may close (Close tab on decision pages). */
+document.addEventListener("click", (e) => {
+  const a = e.target.closest('a[href^="#"]');
+  if (!a || e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+  const t = document.getElementById(decodeURIComponent(a.hash.slice(1)));
+  if (!t) return;
+  e.preventDefault();
+  t.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+  if (!t.hasAttribute("tabindex")) t.setAttribute("tabindex", "-1");
+  t.focus({ preventScroll: true });
+  history.replaceState(null, "", a.hash);
+  dispatchEvent(new HashChangeEvent("hashchange"));
+});
 /* Hover help: every [data-tip] gets a box on hover (mouse), keyboard focus, or tap (tap again or tap elsewhere to close). SVG nodes become focusable. */
 (() => {
   const els = [...document.querySelectorAll("[data-tip]")];
