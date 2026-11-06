@@ -20,6 +20,7 @@
   
   /* faint hues for stat cards: */
   --tint-slate:rgba(71,85,105,.06);--tint-teal:rgba(15,118,110,.07);--tint-blue:rgba(36,64,232,.06);--tint-amber:rgba(180,83,9,.07);--tint-pink:rgba(190,24,93,.06);--tint-cyan:rgba(14,116,144,.07);
+  --mark:#ffe27a;
   --scroll:#c9c9c2;--radius:12px;--font:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 *{box-sizing:border-box}html{scroll-behavior:smooth;scrollbar-color:var(--scroll) transparent}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
@@ -40,16 +41,18 @@ h3{font-size:16px;margin:0 0 8px}
 .chip.good{background:var(--good-tint);color:var(--good)}.chip.warn{background:var(--warn-tint);color:var(--warn)}.chip.bad{background:var(--bad-tint);color:var(--bad)}.chip.accent{background:var(--accent-tint);color:var(--accent)}
 .chip.plain::before{display:none}
 /* One thing (goldfish style): the single action the reader must take now, 15 words max, framed by a rule that is heaviest at
-   its label and fades out; then 0-3 terse numbered steps. Ink border, no color. check-report.mjs enforces the word caps. */
+   its label and fades out, its words under a yellow highlighter stroke (wrap them in <mark>); then 0-3 terse steps with solid ink
+   numbers. Ink border; the highlighter is the block's only color. check-report.mjs enforces the word caps. */
 .cta{margin:20px 0 0;padding:0 0 4px;background:var(--surface);border:1.5px solid var(--ink);border-radius:var(--radius);overflow:hidden}
 .one-h{display:flex;align-items:center;gap:12px;margin:0;padding:14px 18px 0;font-size:12.5px;font-weight:700;letter-spacing:.02em;color:var(--ink);white-space:nowrap}
 .one-h::before,.one-h::after{content:"";flex:1;height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,var(--faint) 55%,var(--ink))}.one-h::after{transform:scaleX(-1)}
 .one{margin:0;padding:8px 18px 16px;font-size:20px;line-height:1.3;font-weight:700;letter-spacing:-.015em;text-align:center;text-wrap:balance}
+.one mark{background:linear-gradient(transparent 52%,var(--mark) 52%,var(--mark) 92%,transparent 92%);color:inherit;padding:0 2px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
 .one+.next{border-top:1px solid var(--line)}
 .next{margin:0;padding:0;list-style:none;counter-reset:n}
 .next li{display:grid;grid-template-columns:22px 1fr;gap:12px;padding:9px 18px;align-items:baseline;counter-increment:n}
 .next li+li{border-top:1px solid var(--line)}
-.next li::before{content:counter(n);width:22px;height:22px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--ink);color:var(--ink);display:grid;place-items:center;font-weight:700;font-size:12px;align-self:start}
+.next li::before{content:counter(n);width:22px;height:22px;border-radius:50%;background:var(--ink);color:var(--surface);display:grid;place-items:center;font-weight:700;font-size:12px;align-self:start}
 .next b{font-size:14.5px}.next span{color:var(--mute);font-size:13.5px;margin-left:8px}
 /* stat strip: at most 4 cards, ink numbers, each on its own faint hue over white so they read apart; .good .warn .bad pick the hue by meaning */
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:12px 0 0}
@@ -158,7 +161,7 @@ nav.toc .pill{position:absolute;top:10px;left:0;height:31px;border-radius:999px;
 
   <div class="cta">
     <p class="one-h">One thing</p>
-    <p class="one">The one action you must take now, 15 words max.</p>
+    <p class="one"><mark>The one action you must take now, 15 words max.</mark></p>
     <ol class="next">
       <li><div><b>First step, naming who</b><span>why, in a few words</span></div></li>
       <li><div><b>Second step</b><span>what it unlocks</span></div></li>
