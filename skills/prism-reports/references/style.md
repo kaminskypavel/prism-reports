@@ -2,11 +2,11 @@
 
 ## Layout: decision first
 
-1. **Header**: the question as h1, then the answer in one sentence that names the thing or person to act on (`.lede`), then one muted meta line (date, sources, method, cost).
-2. **Next steps** (`.cta` > `.cta-h` + `ol.next`): the call to action. Title "Next steps" with "Do these in order"; 1-3 numbered asks, each naming who or what and through whom, with one muted line on why. Marked by a stronger border (1.5px ink) and its title, never by color: ink step numbers, no tints. Research-only pages with nothing to do may title it "What this means", still 1-3 lines. On a decision page the block is "Your call": each question to answer, linked to its section, with the recommendation as the muted line; the Copy results button sits in the sticky nav.
+1. **Header**: the question as h1, then the answer in one sentence that names the thing or person to act on (`.lede`, 25 words max), then one muted meta line (date, sources, method, cost).
+2. **One thing** (`.cta` > `p.one-h` + `p.one` + optional `ol.next`): the call to action, borrowed from goldfish's ONE THING frame. `p.one-h` is the label "One thing" on a rule that is heaviest at the label and fades out; `p.one` is the single action the user must take now, bold, centered, **15 words max, one per page**. Under it, 0-3 numbered steps, 14 words max each: a bold ask naming who or what, then a few muted words on why. Pick the one thing by what changes the reader's next move: a pending question beats a status, a blocker beats a win, a choice names both arms. Marked by a stronger border (1.5px ink), never by color: ink step numbers, no tints. Research-only pages with nothing to do make the one thing the takeaway. On a decision page the one thing says how many questions to answer and to Copy results; each step is a question linked to its section with "X recommended" as the muted words; the Copy results button sits in the sticky nav.
 3. **Stats** (`.stats` / `.stat`): at most 4 small cards inside one white frame, ink numbers, each card on its own faint hue so they read apart: slate, teal, blue, amber by position, or by meaning with `.good` (teal), `.warn` (amber), `.bad` (pink). Each links to its section. The first stat is the decision's key number. Cost and run metadata go in the meta line, never in a stat. Skip the strip when the answer is a person or a choice, not a number.
 4. **Sticky nav** (`nav.toc`): one scrolling row with every section plus Appendix; the template script marks the section in view. Round links carry `.latest` on the newest.
-5. **Evidence sections**: question-style h2, an optional status chip, a one-line thesis, then panels. Order by what the reader needs to act, not by how the research went.
+5. **Evidence sections**: question-style h2, an optional status chip, a one-line thesis (20 words max), then panels. Order by what the reader needs to act, not by how the research went.
 6. **Appendix** (`<details>`): funnels, method, sources, caveats, secondary matrices, run files. Nothing the reader needs to act lives only here. Technical tables at the end of a page (runs, change logs, raw data, full lists) sit in a closed `<details>`, never `open`, with a summary naming the table and its row count ("All runs · 12").
 
 ## Look
@@ -24,7 +24,7 @@
 
 ## Components (all in the templates)
 
-- `.cta`, `.cta-h`, `ol.next`: the call to action. `.stats` / `.stat`: hued stat cards.
+- `.cta`, `.one-h`, `.one`, `ol.next`: the One thing block. `.stats` / `.stat`: hued stat cards.
 - `.chip` with `.good` `.warn` `.bad` `.accent` (`.plain` drops the dot): status next to an h2 or in a table cell.
 - `.who`: avatar (photo data URI or initials) + name + role, for people in cards and table cells.
 - `.panel`, `.cols` (2-up), `.ph` panel label, `.cap` caption, `.note` soft callout.

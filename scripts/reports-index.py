@@ -11,7 +11,8 @@ Usage:
 below it adds an "All <hub folder>" link to the index it builds and refreshes the hub.
 --fixed pins the back link to a corner instead of placing it in the page flow
 (bottom-left corner, so it clears the mockup's own header) for design mockups and prototypes
-whose own layout must not shift.
+whose own layout must not shift. Pages built from a prism template (a .wrap column with a .cta)
+always get the link first in their content column instead, so it lines up with the page.
 
 Reports are <dir>/*.html and <dir>/*/index.html (one level down). For each report:
   title  <title>, else the first <h1>
@@ -37,6 +38,7 @@ from datetime import datetime
 from pathlib import Path
 
 FLOW = "display:inline-block;margin:16px 0 0 16px;"
+COLUMN = "display:inline-block;margin:0 0 18px;"
 FIXED = "position:fixed;bottom:12px;left:12px;z-index:2147483647;opacity:.92;"
 BACK = (
     '<a class="report-back" dir="ltr" href="{href}" target="_blank" rel="noopener" style="{place}'
@@ -163,7 +165,19 @@ def main() -> None:
         href = "../index.html" if "/" in rel else "index.html"
         link = BACK.format(href=href, place=place, label=html.escape(index_title.lower()))
         old = re.search(r'<a\s[^>]*class="report-back"[^>]*>.*?</a>', src, re.S)
-        if old and f'href="{href}"' not in old.group(0):
+        wrap = re.search(r'<div\s+class="wrap"[^>]*>', src) if 'class="cta"' in src else None
+        if wrap:
+            # A prism page: the link sits first in the content column, so it lines up with the page like the index's own link.
+            # An existing link keeps its look (Midnight's is white) and only moves.
+            link = (old.group(0) if old and f'href="{href}"' in old.group(0) else BACK.format(href=href, place=COLUMN, label=html.escape(index_title.lower())))
+            link = link.replace(FLOW, COLUMN).replace(FIXED, COLUMN)
+            if not re.search(r'<div\s+class="wrap"[^>]*>\s*' + re.escape(link), src):
+                if old:
+                    src = src[: old.start()] + src[old.end() :].removeprefix("\n")
+                wrap = re.search(r'<div\s+class="wrap"[^>]*>', src)
+                src = src[: wrap.end()] + "\n  " + link + src[wrap.end() :]
+                changed = True
+        elif old and f'href="{href}"' not in old.group(0):
             src = src[: old.start()] + link + src[old.end() :]
             changed = True
         elif not old:

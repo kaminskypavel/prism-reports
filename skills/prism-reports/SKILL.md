@@ -20,7 +20,7 @@ Paths below are relative to this skill's base directory (the Skill tool prints i
 1. **Pick the page type.** Report (`daylight-report.html`), dark report only when asked (`midnight-report.html`), decision page (`decision-page.html`).
 2. **Build one data object first.** Every number, verdict, path and label the page shows comes from it. The lede, the next steps, the stats, cards, tables and charts all read from that object, so two views can never disagree.
 3. **Copy the template.** Keep its style block and all its script blocks; replace the demo content; delete components you don't use. Don't extract the style or scripts with a regex that can match the words inside the template's own comments; anchor on `<style>\n:root` and line-start `<script>`.
-4. **Lay it out decision first** (see [references/style.md](references/style.md)): question h1, one-sentence answer, the titled "Next steps" block, up to 4 stats, sticky nav, evidence sections, appendix.
+4. **Lay it out decision first** (see [references/style.md](references/style.md)): question h1, one-sentence answer, the "One thing" block, up to 4 stats, sticky nav, evidence sections, appendix.
 5. **Show, don't tell.** Every point that can be a chart becomes a chart: range bars, stacked bars, treemaps, ranked lists, verdict cards, matrices with SVG icons, step paths. Networks use Cytoscape ([references/networks.md](references/networks.md)). Every flow, process, timeline, Gantt, sequence, state or architecture is drawn with the `diagram-design` skill (a dependency of this plugin), never by hand ([references/style.md](references/style.md#diagrams)).
 6. **Iterations and choices.** Latest round on top, earlier rounds collapsed below; choices get a decision page ([references/decisions-and-iterations.md](references/decisions-and-iterations.md)).
 7. **File and index it.** Save it in the repo's `docs/` section (`docs/reports/`, `docs/design/`, `docs/decisions/`, or a section the repo already has) as `YYYY-MM-DD-topic.html`; run the index script on that section and the hub on `docs/` ([references/index.md](references/index.md)).
@@ -30,8 +30,9 @@ Paths below are relative to this skill's base directory (the Skill tool prints i
 ## Musts
 
 - Decision first: the answer and the next step are visible without scrolling.
+- Goldfish short: one thing per page, 15 words max; the answer 25; each step 14; each section thesis 20. If it needs more words it is not one thing yet. `check-report.mjs` enforces the caps.
 - Minimal: light paper page, white surfaces with 1px borders, ink text, color only where it means something (good, caution, risk) or to tell stat cards and chart series apart. No gradient tiles, no white text on light fills, no colored left borders, no emoji or Unicode glyphs as icons.
-- The call to action is a titled block with a stronger ink border, never colored.
+- The call to action is the One thing block with a stronger ink border, never colored.
 - Tables sort; filters only where the reader will slice; wide tables scroll inside their panel on phones.
 - Latest iteration on top. Anything the user must pick, approve or answer renders as a decision page: click to answer, Copy results in the sticky top bar.
 - Compact: one HTML file; libraries from a pinned CDN (`cdn.jsdelivr.net/npm/<pkg>@<x.y.z>`), never inlined; images as small downscaled data URIs or files next to the page; no external fonts.

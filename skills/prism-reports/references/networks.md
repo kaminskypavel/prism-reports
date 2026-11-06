@@ -13,7 +13,7 @@ Who knows whom, intro paths, dependencies, org links: an interactive Cytoscape.j
 ## Behavior
 
 - Compute one canonical chain per node in the data step (fewest intros, then the bridge who reaches the most people, then direct connections over coworker-only links) and store it on the node. Never recompute "shortest" in the browser with different weights: the graph and the tables must name the same chain.
-- Open with the recommended path already lit (the same chain the Next steps name).
+- Open with the recommended path already lit (the same chain the One thing block names).
 - Click a node: light its canonical chain strongly, its other incoming paths faintly, fade everything else, and print the chain under the graph. Click a bridge: also show who it reaches. Click the background or You: back to the recommended path.
 - Under 640px hide the canvas; the table carries the same chains.
 - Pair the graph with a table (or a column in the main table) listing each target's chain.

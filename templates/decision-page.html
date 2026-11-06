@@ -38,9 +38,13 @@ h3{font-size:16px;margin:0 0 8px}
 .chip::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
 .chip.good{background:var(--good-tint);color:var(--good)}.chip.warn{background:var(--warn-tint);color:var(--warn)}.chip.bad{background:var(--bad-tint);color:var(--bad)}.chip.accent{background:var(--accent-tint);color:var(--accent)}
 .chip.plain::before{display:none}
-/* call to action: a titled block with an ink border, no color; 1-3 numbered asks right under the answer, one line each */
-.cta{margin:20px 0 0;padding:0 0 4px;background:var(--surface);border:1px solid var(--ink);border-radius:var(--radius);overflow:hidden}
-.cta-h{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 10px;padding:13px 18px 3px}.cta-h b{font-size:15px;letter-spacing:-.01em}.cta-h span{font-size:12.5px;color:var(--mute)}
+/* One thing (goldfish style): the single action the reader must take now, 15 words max, framed by a rule that is heaviest at
+   its label and fades out; then 0-3 terse numbered steps. Ink border, no color. check-report.mjs enforces the word caps. */
+.cta{margin:20px 0 0;padding:0 0 4px;background:var(--surface);border:1.5px solid var(--ink);border-radius:var(--radius);overflow:hidden}
+.one-h{display:flex;align-items:center;gap:12px;margin:0;padding:14px 18px 0;font-size:12.5px;font-weight:700;letter-spacing:.02em;color:var(--ink);white-space:nowrap}
+.one-h::before,.one-h::after{content:"";flex:1;height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,var(--faint) 55%,var(--ink))}.one-h::after{transform:scaleX(-1)}
+.one{margin:0;padding:8px 18px 16px;font-size:20px;line-height:1.3;font-weight:700;letter-spacing:-.015em;text-align:center;text-wrap:balance}
+.one+.next{border-top:1px solid var(--line)}
 .next{margin:0;padding:0;list-style:none;counter-reset:n}
 .next li{display:grid;grid-template-columns:22px 1fr;gap:12px;padding:9px 18px;align-items:baseline;counter-increment:n}
 .next li+li{border-top:1px solid var(--line)}
@@ -127,7 +131,7 @@ details{border-top:1px solid var(--line);padding:12px 0}details:last-child{borde
 summary{cursor:pointer;font-weight:600}details[open] summary{margin-bottom:12px}
 .src{font-size:13.5px;line-height:1.9;color:var(--mute)}
 @media (max-width:640px){
-  .wrap{padding:24px 16px 64px}h1{font-size:28px}.lede{font-size:16.5px}h2{font-size:19px}
+  .wrap{padding:24px 16px 64px}h1{font-size:28px}.lede{font-size:16.5px}h2{font-size:19px}.one{font-size:18px}
   nav.toc{margin:22px -16px 0;padding:8px 16px}
   .stats{grid-template-columns:1fr 1fr}
   .rb{grid-template-columns:110px 1fr 64px;gap:10px}.panel{padding:16px}
@@ -150,13 +154,12 @@ summary{cursor:pointer;font-weight:600}details[open] summary{margin-bottom:12px}
 .pick:hover{background:var(--soft)}
 .opt.on .pick{background:var(--ink);color:var(--surface)}.opt.on .pick::before{content:"\2713";background:var(--surface);color:var(--ink);border-color:var(--surface)}
 .opts:has(.opt.on):not([data-multi]) .opt:not(.on){opacity:.6}
-/* answers: Copy results pinned at the right of the sticky nav; a note box under each question */
-nav.toc .copy-all{flex:none;margin-left:auto;position:sticky;right:0;font:inherit;font-size:13.5px;font-weight:600;padding:6px 14px;border-radius:999px;border:1px solid var(--ink);background:var(--ink);color:var(--surface);cursor:pointer;box-shadow:-14px 0 10px var(--bg)}
+/* answers: Copy results pinned at the right of the sticky nav, and after a copy a Close tab button right next to it
+   (the script wraps both in .acts; Close tab springs in with Motion). A note box under each question. */
+nav.toc .acts{flex:none;margin-left:auto;position:sticky;right:0;display:flex;gap:6px;background:var(--bg);box-shadow:-14px 0 10px var(--bg)}
+nav.toc .acts button{flex:none;font:inherit;font-size:13.5px;font-weight:600;padding:6px 14px;border-radius:999px;border:1px solid var(--ink);background:var(--ink);color:var(--surface);cursor:pointer;white-space:nowrap}
 nav.toc .copy-all.done{background:var(--good);border-color:var(--good)}
-/* after Copy results: a toast with a Close tab button; springs in with Motion (pinned CDN, loaded on first copy), plain show when offline or reduced motion */
-.done-toast{position:fixed;left:0;right:0;bottom:20px;margin:0 auto;width:max-content;max-width:calc(100vw - 24px);z-index:40;display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;padding:10px 10px 10px 16px;border-radius:14px;background:var(--ink);color:var(--surface);font-size:14px;box-shadow:0 10px 30px rgba(0,0,0,.22)}
-.done-toast[hidden]{display:none}.done-toast button{font:inherit;font-size:14px;font-weight:600;padding:8px 14px;border-radius:10px;border:0;cursor:pointer}
-.done-toast .close-tab{background:var(--surface);color:var(--ink)}.done-toast .keep{background:none;color:var(--surface);text-decoration:underline;text-underline-offset:3px}
+nav.toc .acts .close-tab{background:var(--surface);color:var(--ink)}nav.toc .acts .close-tab[hidden]{display:none}
 .qnote{display:block;width:100%;margin-top:10px;font:inherit;font-size:14px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--surface);color:var(--ink)}
 /* hover help: data-tip on any element (SVG diagram node, bar, row). Lines "What: ..." / "Why: ..." get a bold label. Opens on hover, keyboard focus or tap. */
 [data-tip]{cursor:help}
@@ -168,8 +171,8 @@ nav.toc .pill{position:absolute;top:10px;left:0;height:31px;border-radius:999px;
 </style>
 </head>
 <body>
-<a class="report-back" dir="ltr" href="index.html" style="display:inline-block;margin:16px 0 0 16px;padding:6px 14px;border-radius:999px;background:#141414;color:#fff;text-decoration:none;font:600 13px/1.4 -apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,sans-serif">&larr; All designs</a>
 <div class="wrap">
+  <a class="report-back" dir="ltr" href="index.html" style="display:inline-block;margin:0 0 18px;padding:6px 14px;border-radius:999px;background:#141414;color:#fff;text-decoration:none;font:600 13px/1.4 -apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,sans-serif">&larr; All designs</a>
   <header>
     <h1>Which option should we ship for the thing being decided?</h1>
     <p class="lede">Recommendation: B, in one sentence that names why.</p>
@@ -177,10 +180,11 @@ nav.toc .pill{position:absolute;top:10px;left:0;height:31px;border-radius:999px;
   </header>
 
   <div class="cta">
-    <div class="cta-h"><b>Your call</b><span>Click your answers below, then Copy results in the top bar and paste it in the chat</span></div>
+    <p class="one-h">One thing</p>
+    <p class="one">Answer 2 questions, then Copy results (top right) and paste it in the chat.</p>
     <ol class="next">
-      <li><div><b><a href="#round-2">Which option should we ship?</a></b><span>Recommended: B, because of the one thing that decides it.</span></div></li>
-      <li><div><b><a href="#ship">Ship it this week?</a></b><span>Recommended: yes, once the pick above is in.</span></div></li>
+      <li><div><b><a href="#round-2">Which option should we ship?</a></b><span>B recommended</span></div></li>
+      <li><div><b><a href="#ship">Ship it this week?</a></b><span>Yes recommended</span></div></li>
     </ol>
   </div>
 
@@ -412,38 +416,31 @@ for (const a of document.querySelectorAll('a[href]:not([href^="#"])')) { a.targe
     const t = text();
     try { await navigator.clipboard.writeText(t); }
     catch { const a = document.createElement("textarea"); a.value = t; document.body.append(a); a.select(); document.execCommand("copy"); a.remove(); }
-    btn.textContent = "Copied, paste it in the chat";
+    btn.textContent = "Copied, paste in chat";
     btn.classList.add("done");
     setTimeout(() => { btn.classList.remove("done"); label(); }, 1800);
-    toast();
+    showClose();
   });
-  /* After a copy: a toast with Close tab. Browsers let a page close only a tab it opened or one with a single history entry
+  /* After a copy, Close tab springs in right next to Copy results (Motion from the pinned CDN, loaded on the first pick; plain when
+     offline or with reduced motion). Browsers let a page close only a tab it opened or one with a single history entry
      (a page opened from the terminal is one), so when the tab stays open the button names the shortcut instead. */
-  let box, lib;
+  const acts = Object.assign(document.createElement("span"), { className: "acts" });
+  const close = Object.assign(document.createElement("button"), { className: "close-tab", type: "button", textContent: "Close tab", hidden: true });
+  btn.before(acts);
+  acts.append(btn, close);
+  close.addEventListener("click", () => {
+    window.close();
+    setTimeout(() => { close.textContent = /Mac|iP/.test(navigator.platform) ? "Press \u2318W" : "Press Ctrl+W"; }, 300);
+  });
+  let lib, shown = false;
   const motion = () => (lib ??= matchMedia("(prefers-reduced-motion: reduce)").matches ? Promise.resolve(null)
     : import("https://cdn.jsdelivr.net/npm/motion@14.9.0/+esm").catch(() => null));
-  const toast = async () => {
-    if (!box) {
-      box = Object.assign(document.createElement("div"), { className: "done-toast", hidden: true });
-      box.setAttribute("role", "status");
-      box.innerHTML = '<span>Copied. Paste it in the chat, then close this tab.</span><button class="close-tab" type="button">Close tab</button><button class="keep" type="button">Keep open</button>';
-      document.body.append(box);
-      box.querySelector(".close-tab").addEventListener("click", (e) => {
-        window.close();
-        setTimeout(() => { e.target.textContent = /Mac|iP/.test(navigator.platform) ? "Press \u2318W to close" : "Press Ctrl+W to close"; }, 300);
-      });
-      box.querySelector(".keep").addEventListener("click", async () => {
-        const m = await motion();
-        if (m) await m.animate(box, { opacity: 0, y: 16 }, { duration: 0.18 });
-        box.hidden = true;
-      });
-    }
-    if (!box.hidden) return;
+  const showClose = async () => {
+    if (shown) return;
+    shown = true;
     const m = await motion();
-    box.hidden = false;
-    if (!m) return;
-    m.animate(box, { y: [28, 0], scale: [0.94, 1] }, { type: "spring", bounce: 0.35, duration: 0.55 });
-    m.animate(box, { opacity: [0, 1] }, { duration: 0.2 });
+    close.hidden = false;
+    if (m) m.animate(close, { opacity: [0, 1], x: [-12, 0], scale: [0.9, 1] }, { type: "spring", bounce: 0.35, duration: 0.5 });
   };
   label();
 })();

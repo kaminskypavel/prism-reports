@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Render a report at 1440px and 390px: prints scrollWidth (must equal the viewport), page and console errors,
+// Render a report at 1440px and 390px: prints scrollWidth (must equal the viewport), page and console errors, word-budget misses,
 // and writes full-page screenshots. Run from a folder where @playwright/test (or playwright) resolves.
 // Usage: node check-report.mjs <page.html> [out-dir]
 import { createRequire } from "node:module";
@@ -28,6 +28,16 @@ for (const [w, h] of [[1440, 900], [390, 844]]) {
   await page.goto(url);
   await page.waitForTimeout(400);
   const sw = await page.evaluate(() => document.documentElement.scrollWidth);
+  // Goldfish budget on prism pages (they have a .cta): exactly one One thing, and short lines above the fold.
+  if (w > 500) errors.push(...await page.evaluate(() => {
+    if (!document.querySelector(".cta")) return [];
+    const words = (el) => el.textContent.split(/\s+/).filter((x) => /[\p{L}\p{N}]/u.test(x)).length;
+    const n = document.querySelectorAll(".cta .one").length;
+    const out = n === 1 ? [] : [`budget: the .cta needs exactly one p.one (the One thing), found ${n}`];
+    for (const [sel, cap] of [[".one", 15], [".lede", 25], [".next li", 14], [".thesis", 20]])
+      for (const el of document.querySelectorAll(sel)) if (words(el) > cap) out.push(`budget: ${sel} has ${words(el)} words, cap ${cap}: "${el.textContent.trim().slice(0, 70)}"`);
+    return out;
+  }));
   const name = basename(file, ".html") === "index" ? basename(dirname(resolve(file))) : basename(file, ".html"); // folder pages: name after the folder
   const shot = resolve(out, `${name}-${w}.png`);
   await page.screenshot({ path: shot, fullPage: true });
