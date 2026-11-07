@@ -143,6 +143,8 @@ summary{cursor:pointer;font-weight:600}details[open] summary{margin-bottom:12px}
 /* decision page: options to pick from */
 .opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-top:14px}
 .opt{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;display:flex;flex-direction:column;gap:12px;scroll-margin-top:70px}
+/* Recommended: the script tags every card whose chip says Recommended; it carries a green frame and a solid chip from the start. */
+.opt.rec{border-color:var(--good);box-shadow:0 0 0 1px var(--good)}.chip.rec{background:var(--good);color:#fff}
 .opt.on{border-color:var(--ink);box-shadow:0 0 0 2px var(--ink)}
 .opt-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.opt-h b{font-size:17px;letter-spacing:-.01em}
 .opt>p{margin:0;color:var(--mute);font-size:14px}
@@ -156,18 +158,58 @@ summary{cursor:pointer;font-weight:600}details[open] summary{margin-bottom:12px}
 .opts[data-multi] .pick::before{border-radius:4px}
 .pick:hover{background:var(--soft)}
 .opt.on .pick{background:var(--ink);color:var(--surface)}.opt.on .pick::before{content:"\2713";background:var(--surface);color:var(--ink);border-color:var(--surface)}
-.opts:has(.opt.on):not([data-multi]) .opt:not(.on){opacity:.6}
-/* answers: Copy results pinned at the right of the sticky nav, and after a copy a Close tab button right next to it
-   (the script wraps both in .acts; Close tab springs in with Motion). A note box under each question. */
+/* Focus: in an answered single-pick question the cards you did not pick fade (no blur); in the questions area every question but the one
+   on screen fades and blurs (.away, set by the script). Keyboard focus brings any of them back; hover mostly does, after a beat. */
+.opts[data-q] .opt,.away{transition:opacity .3s,filter .3s}
+.opts:has(.opt.on):not([data-multi]) .opt:not(.on){opacity:.45}.away{opacity:.4;filter:blur(1.5px)}
+.opts:has(.opt.on):not([data-multi]) .opt:not(.on):is(:hover,:focus-within),.away:focus-within{opacity:1;filter:none}
+.away:hover{opacity:.85;filter:none;transition-delay:.25s} /* a resting mouse should not undo focus at once */
+/* answers: Copy results (Send results when served, with a Copy button before it) pinned at the right of the sticky nav, and after
+   a copy a Close tab button right next to it (the script wraps them in .acts; Close tab springs in with Motion). A note box under each question. */
 nav.toc .acts{flex:none;margin-left:auto;position:sticky;right:0;display:flex;gap:6px;background:var(--bg);box-shadow:-14px 0 10px var(--bg),32px 0 0 var(--bg)}
 nav.toc .acts button{flex:none;font:inherit;font-size:13.5px;font-weight:600;padding:6px 14px;border-radius:999px;border:1px solid var(--ink);background:var(--ink);color:var(--surface);cursor:pointer;white-space:nowrap}
-nav.toc .copy-all.done{background:var(--good);border-color:var(--good)}
-nav.toc .acts .close-tab{background:var(--surface);color:var(--ink)}nav.toc .acts .close-tab[hidden]{display:none}
-/* Next question: under each question's note box; jumps to the next question, the last one copies the results. Fills once answered. */
+nav.toc .acts .close-tab,nav.toc .acts .copy-one{background:var(--surface);color:var(--ink)}nav.toc .acts [hidden]{display:none}
+/* Results button (Send or Copy): green, the page's one go action. Tinted until every question is answered, then solid. */
+nav.toc .acts .copy-all,.next-q.send{display:inline-flex;align-items:center;gap:8px;background:var(--good-tint);color:var(--good);border-color:var(--good)}
+nav.toc .acts .copy-all.ready,.next-q.send.ready,.next-q.send.ready:hover{background:var(--good);color:#fff}.next-q.send:hover{background:#d5ebe7}
+nav.toc .acts .done{background:var(--good);border-color:var(--good);color:var(--surface)}
+/* Next question: under each question's note box; jumps to the next question (the last one to the general note, whose button sends). Fills once answered. */
 .next-q{display:flex;align-items:center;gap:8px;width:max-content;margin:10px 0 0 auto;font:inherit;font-size:14px;font-weight:600;padding:8px 16px;border-radius:999px;border:1.5px solid var(--ink);background:var(--surface);color:var(--ink);cursor:pointer}
 .next-q:hover{background:var(--soft)}.next-q.ready,.next-q.ready:hover{background:var(--ink);color:var(--surface)}
 .opts[data-q]{scroll-margin-top:72px}
-.qnote{display:block;width:100%;margin-top:10px;font:inherit;font-size:14px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--surface);color:var(--ink)}
+/* Notes: a box under each question, and one general note ("Anything else?") before the last Send results. They grow as you type. */
+.qnote{display:block;width:100%;min-height:42px;margin-top:10px;padding:10px 12px 10px 36px;font:inherit;font-size:14px;line-height:1.45;color:var(--ink);background:transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%235c5c56' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10.8 2.7l2.5 2.5-7.6 7.6-3.2.7.7-3.2z'/%3E%3C/svg%3E") 12px 13px/15px no-repeat;border:1px dashed var(--scroll);border-radius:10px;resize:none;overflow:hidden;transition:border-color .15s,background-color .15s,box-shadow .15s}
+.qnote::placeholder{color:var(--mute)}.qnote:hover{border-color:var(--faint)}
+.qnote:not(:placeholder-shown){border-style:solid;border-color:var(--line);background-color:var(--surface)}
+.qnote:focus{outline:none;border-style:solid;border-color:var(--ink);background-color:var(--surface);box-shadow:0 0 0 3px rgba(20,20,20,.08)}
+.gnote{margin:32px 0 0;padding:22px 0 0;border-top:1px solid var(--line)}
+.gnote label{display:block;font-size:17px;font-weight:700;letter-spacing:-.01em}
+.gnote p{margin:2px 0 0;font-size:14px;color:var(--mute)}.gnote .qnote{min-height:88px}
+/* Multi-select questions (data-multi): a bar above the options with the count and Select all / Deselect all. */
+.qbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 10px;font-size:13.5px;color:var(--mute);font-variant-numeric:tabular-nums}
+.qbar button{font:inherit;font-weight:600;color:var(--ink);background:none;border:0;padding:4px 2px;cursor:pointer;text-decoration:underline;text-decoration-color:var(--scroll);text-underline-offset:3px}
+.qbar button:hover{text-decoration-color:var(--ink)}.qbar button:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:4px}
+/* Question wizard: on screens 1180px and wider, a docked white panel down the left edge, there from the start; the page sits beside it.
+   Every question is a step with your answer, the one on screen in bold, click to jump, a last step for the general note. Phones use Next question. */
+.wiz{display:none}
+@media (min-width:1180px){
+  body:has(.opts[data-q]) .wrap{margin-left:calc(256px + max(0px, (100vw - 256px - 1120px) / 2))}
+  .wiz{display:block;position:fixed;z-index:11;inset:0 auto 0 0;width:256px;overflow:hidden auto;padding:28px 18px 24px 22px;background:var(--surface);border-right:1px solid var(--line)}
+}
+.wiz-h{display:flex;justify-content:space-between;gap:6px;margin:0 0 14px;font-size:12.5px;font-weight:700;white-space:nowrap}
+.wiz-h .wq{color:var(--ink)}.wiz-h .wn{color:var(--mute);font-weight:600;font-variant-numeric:tabular-nums}
+.wiz ol{list-style:none;margin:0;padding:0}
+.wiz li{position:relative}
+.wiz li:not(:last-child)::after{content:"";position:absolute;left:11.25px;top:33px;bottom:-3px;width:1.5px;border-radius:1px;background:var(--line)}
+.wiz li.done:not(:last-child)::after{background:var(--ink)}
+.wiz li button{display:grid;grid-template-columns:24px minmax(0,1fr);width:100%;column-gap:12px;align-items:start;padding:6px 0 10px;border:0;border-radius:8px;background:none;font:inherit;text-align:left;color:var(--mute);cursor:pointer}
+.wiz li button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.wiz i{grid-row:span 2;width:24px;height:24px;border:1.5px solid var(--scroll);border-radius:50%;display:grid;place-items:center;font:normal 700 12px/1 var(--font);color:var(--mute);background:var(--surface);transition:background-color .2s,border-color .2s}
+.wiz .on i{border-color:var(--ink);color:var(--ink)}.wiz .extra i{border-style:dashed}
+.wiz .done i{background:var(--ink) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='none' stroke='white' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2.5 6.2l2.3 2.3L9.5 3.8'/%3E%3C/svg%3E") center/12px no-repeat;border-color:var(--ink);color:transparent}
+.wiz .wt{font-size:13.5px;font-weight:500;line-height:1.35;padding-top:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;transition:opacity .15s}
+.wiz .wa{margin-top:2px;font-size:12.5px;line-height:1.35;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:opacity .15s}.wiz .wa:empty{display:none}
+.wiz li button:hover .wt,.wiz .on .wt{color:var(--ink)}.wiz .on .wt{font-weight:650}
 /* hover help: data-tip on any element (SVG diagram node, bar, row). Lines "What: ..." / "Why: ..." get a bold label. Opens on hover, keyboard focus or tap. */
 [data-tip]{cursor:help}
 .tip{position:fixed;z-index:50;max-width:min(340px,calc(100vw - 16px));padding:10px 12px;border-radius:10px;background:var(--ink);color:var(--surface);font-size:13px;line-height:1.5;pointer-events:none;box-shadow:0 6px 24px rgba(0,0,0,.18)}.tip div+div{margin-top:4px}
@@ -382,7 +424,8 @@ document.addEventListener("click", (e) => {
 </script>
 <script>
 /* Answers: every .opts[data-q] is one question (add data-multi to allow several picks); its .opt[data-key][data-name] cards have Pick buttons.
-   Each question gets a note box. The Copy results button in the sticky nav copies every answer as one block to paste back in the chat.
+   Each question gets a note box (multi-select ones also a Select all bar), and the last one is followed by a general note, "Anything else?".
+   A docked step list (the wizard) tracks them, and focus dims every question but the one on screen. The Copy results button in the sticky nav copies every answer as one block to paste back in the chat.
    Served by scripts/collect-answers.py (it answers GET /__prism), it becomes Send results: one click posts the answers to the waiting
    agent and closes the tab, nothing to paste. Answers are remembered per page. */
 (() => {
@@ -394,17 +437,39 @@ document.addEventListener("click", (e) => {
   try { saved = JSON.parse(localStorage.getItem(store)) || {}; } catch {}
   const title = (document.querySelector("h1")?.textContent || document.title).trim();
   const picks = (g) => [...g.querySelectorAll(".opt.on")];
-  const note = (g) => g.nextElementSibling.value.trim();
+  const notes = new Map(), bars = new Map(); // question -> its note box / its Select all bar
+  const note = (g) => notes.get(g).value.trim();
+  const flat = (t) => t.replace(/\s*\n\s*/g, " / "); // one line per answer in the results
+  const answered = () => qs.filter((g) => picks(g).length).length;
   let live = false;
   const verb = () => (live ? "Send results" : "Copy results");
   const label = () => {
-    btn.textContent = `${verb()} · ${qs.filter((g) => picks(g).length).length}/${qs.length}`;
-    for (const e of [nexts.at(-1), ...document.querySelectorAll(".verb")]) e.textContent = verb(); // .verb: the button's name in the One thing
-    qs.forEach((g, i) => nexts[i]?.classList.toggle("ready", picks(g).length > 0));
+    const icon = live ? plane : "", all = answered() === qs.length;
+    btn.innerHTML = `${verb()} · ${answered()}/${qs.length}${icon}`;
+    fin.innerHTML = verb() + icon;
+    for (const e of document.querySelectorAll(".verb")) e.textContent = verb(); // .verb: the button's name in the One thing
+    btn.classList.toggle("ready", all);
+    qs.forEach((g, i) => nexts[i].classList.toggle("ready", picks(g).length > 0));
+    fin.classList.toggle("ready", all);
+    copier.hidden = !live;
+    for (const [g, bar] of bars) {
+      const n = picks(g).length, all = choices(g).length;
+      bar.firstChild.textContent = `${n} of ${all} picked`;
+      bar.lastChild.textContent = n === all ? "Deselect all" : "Select all";
+    }
+    steps.forEach((li, i) => {
+      li.classList.toggle("done", picks(qs[i]).length > 0);
+      li.querySelector(".wa").textContent = named(qs[i]);
+    });
+    gstep.classList.toggle("done", !!general.value.trim());
+    gstep.querySelector(".wa").textContent = general.value.trim();
+    wiz.querySelector(".wn").textContent = `${answered()}/${qs.length}`;
+    track(); // picking shows the wizard
   };
   const save = () => {
     label();
-    try { localStorage.setItem(store, JSON.stringify(Object.fromEntries(qs.map((g) => [g.dataset.q, { picks: picks(g).map((o) => o.dataset.key), note: note(g) }])))); } catch {}
+    const all = Object.fromEntries(qs.map((g) => [g.dataset.q, { picks: picks(g).map((o) => o.dataset.key), note: note(g) }]));
+    try { localStorage.setItem(store, JSON.stringify({ ...all, __page: { note: general.value.trim() } })); } catch {}
   };
   const mark = (o, on) => {
     const b = o.querySelector(".pick");
@@ -412,15 +477,23 @@ document.addEventListener("click", (e) => {
     b.textContent = on ? "Picked" : b.dataset.label;
     b.setAttribute("aria-pressed", on);
   };
+  const choices = (g) => [...g.querySelectorAll(".opt[data-key]")].filter((o) => o.querySelector(".pick"));
+  const grow = (t) => { t.style.height = "auto"; t.style.height = `${t.scrollHeight + 2}px`; };
+  const noteBox = (value, name, placeholder) => {
+    const t = Object.assign(document.createElement("textarea"), { className: "qnote", rows: 1, placeholder, value: value || "" });
+    t.setAttribute("aria-label", name);
+    t.addEventListener("input", () => { grow(t); save(); });
+    requestAnimationFrame(() => grow(t));
+    return t;
+  };
+  for (const c of document.querySelectorAll(".opt .chip")) if (/^recommended$/i.test(c.textContent.trim())) { c.classList.add("rec"); c.closest(".opt").classList.add("rec"); }
   for (const g of qs) {
     const s = saved[g.dataset.q] || {};
-    const box = Object.assign(document.createElement("input"), { className: "qnote", type: "text", placeholder: "Note (optional)", value: s.note || "" });
-    box.setAttribute("aria-label", `Note on: ${g.dataset.q}`);
-    box.addEventListener("input", save);
+    const box = noteBox(s.note, `Note on: ${g.dataset.q}`, "Add a note (optional)");
+    notes.set(g, box);
     g.after(box);
-    for (const o of g.querySelectorAll(".opt[data-key]")) {
+    for (const o of choices(g)) {
       const b = o.querySelector(".pick");
-      if (!b) continue;
       b.dataset.label = b.textContent;
       mark(o, (s.picks || []).includes(o.dataset.key));
       b.addEventListener("click", () => {
@@ -431,29 +504,86 @@ document.addEventListener("click", (e) => {
         motion();
       });
     }
+    if (g.hasAttribute("data-multi")) {
+      const bar = Object.assign(document.createElement("div"), { className: "qbar" });
+      bar.innerHTML = '<span></span><button type="button"></button>';
+      bar.lastChild.addEventListener("click", () => {
+        const on = picks(g).length < choices(g).length;
+        for (const o of choices(g)) mark(o, on);
+        save();
+        motion();
+      });
+      g.before(bar);
+      bars.set(g, bar);
+    }
   }
-  /* Next question: a button under each question's note box jumps to the next question; the last one copies the results. */
+  /* Next question: a button under each question's note box jumps to the next question; the last one to the general note,
+     "Anything else?", whose button sends (or copies) the results. */
   const smooth = () => (matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth");
+  const spot = (g) => { const s = g.closest("section"); return s && s.querySelector(".opts[data-q]") === g ? s : g; }; // a question's section, when it leads it
+  const go = (g) => spot(g).scrollIntoView({ behavior: smooth() });
+  const block = (g) => { const s = g.closest("section"); return s && s.querySelectorAll(".opts[data-q]").length === 1 ? s : g; }; // what focus dims
+  const answer = (g) => picks(g).map((o) => (o.dataset.name ? `${o.dataset.key} (${o.dataset.name})` : o.dataset.key));
+  const named = (g) => picks(g).map((o) => (o.querySelector(".opt-h b")?.textContent || o.dataset.name || o.dataset.key).trim()).join(", ");
+  const plane = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 1.5 7 9M14.5 1.5 10 14.5 7 9 1.5 6z"/></svg>';
+  const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3v10M3.5 8.5 8 13l4.5-4.5"/></svg>';
+  const gbox = Object.assign(document.createElement("div"), { className: "gnote" });
+  gbox.innerHTML = '<label for="gnote">Anything else?</label><p>A note on the whole page, sent with your answers.</p>';
+  const general = noteBox(saved.__page?.note, "Anything else? A note on the whole page", "Add a general note (optional)");
+  general.id = "gnote";
+  const toGeneral = () => { gbox.scrollIntoView({ behavior: smooth(), block: "center" }); general.focus({ preventScroll: true }); };
   const nexts = qs.map((g, i) => {
-    const last = i === qs.length - 1, n = qs[i + 1];
+    const n = qs[i + 1];
     const b = Object.assign(document.createElement("button"), { className: "next-q", type: "button" });
-    b.innerHTML = last ? "Copy results" : 'Next question <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3v10M3.5 8.5 8 13l4.5-4.5"/></svg>';
-    if (!last) b.setAttribute("aria-label", `Next question: ${n.dataset.q}`);
-    b.addEventListener("click", () => {
-      if (last) return btn.click();
-      const s = n.closest("section");
-      (s && s.querySelector(".opts[data-q]") === n ? s : n).scrollIntoView({ behavior: smooth() });
-    });
-    g.nextElementSibling.after(b);
+    b.innerHTML = `${n ? "Next question" : "Next: general note"} ${arrow}`;
+    if (n) b.setAttribute("aria-label", `Next question: ${n.dataset.q}`);
+    b.addEventListener("click", () => (n ? go(n) : toGeneral()));
+    notes.get(g).after(b);
     return b;
   });
+  const fin = Object.assign(document.createElement("button"), { className: "next-q send", type: "button" });
+  fin.addEventListener("click", () => btn.click());
+  gbox.append(general, fin);
+  nexts.at(-1).after(gbox);
+  /* Question wizard (see .wiz in the CSS): one step per question plus the general note, kept current by label() and on scroll. */
+  const wiz = Object.assign(document.createElement("nav"), { className: "wiz" });
+  wiz.setAttribute("aria-label", "Questions");
+  wiz.innerHTML = '<p class="wiz-h"><span class="wq">Questions</span><span class="wn"></span></p><ol></ol>';
+  const step = (q, n, jump) => {
+    const li = document.createElement("li");
+    li.innerHTML = '<button type="button"><i aria-hidden="true"></i><span class="wt"></span><span class="wa"></span></button>';
+    li.querySelector("i").textContent = n;
+    li.querySelector(".wt").textContent = q;
+    li.firstChild.addEventListener("click", jump);
+    wiz.querySelector("ol").append(li);
+    return li;
+  };
+  const steps = qs.map((g, i) => step(g.dataset.q, i + 1, () => go(g)));
+  const gstep = step("Anything else?", "", toGeneral);
+  gstep.classList.add("extra");
+  document.body.append(wiz);
+  const track = () => {
+    let cur = 0;
+    qs.forEach((g, i) => { if (spot(g).getBoundingClientRect().top < innerHeight / 2) cur = i; });
+    const gt = gbox.getBoundingClientRect().top, end = innerHeight + scrollY >= document.documentElement.scrollHeight - 4;
+    if (gt < innerHeight / 2 || (end && gt < innerHeight)) cur = qs.length; // at the page end the general note may sit low
+    [...steps, gstep].forEach((li, i) => {
+      li.classList.toggle("on", i === cur);
+      if (i === cur) li.firstChild.setAttribute("aria-current", "step"); else li.firstChild.removeAttribute("aria-current");
+    });
+    const inside = spot(qs[0]).getBoundingClientRect().top < innerHeight / 2; // focus starts once you reach the questions
+    [...qs.map(block), gbox].forEach((el, i) => el.classList.toggle("away", inside && i !== cur));
+  };
+  addEventListener("scroll", track, { passive: true });
   const text = () => [
     `Answers from "${title}" (${decodeURIComponent(location.pathname)})`,
-    ...qs.map((g, i) => {
-      const p = picks(g).map((o) => (o.dataset.name ? `${o.dataset.key} (${o.dataset.name})` : o.dataset.key));
-      return `${i + 1}. ${g.dataset.q}: ${p.length ? p.join(", ") : "no answer"}${note(g) ? `. Note: ${note(g)}` : ""}`;
-    }),
+    ...qs.map((g, i) => `${i + 1}. ${g.dataset.q}: ${answer(g).join(", ") || "no answer"}${note(g) ? `. Note: ${flat(note(g))}` : ""}`),
+    ...(general.value.trim() ? [`General note: ${flat(general.value.trim())}`] : []),
   ].join("\n");
+  const copy = async (t) => {
+    try { await navigator.clipboard.writeText(t); }
+    catch { const a = document.createElement("textarea"); a.value = t; document.body.append(a); a.select(); document.execCommand("copy"); a.remove(); }
+  };
   btn.addEventListener("click", async () => {
     const t = text();
     if (live) {
@@ -467,8 +597,7 @@ document.addEventListener("click", (e) => {
         return;
       }
     }
-    try { await navigator.clipboard.writeText(t); }
-    catch { const a = document.createElement("textarea"); a.value = t; document.body.append(a); a.select(); document.execCommand("copy"); a.remove(); }
+    await copy(t);
     btn.textContent = "Copied, paste in chat";
     btn.classList.add("done");
     setTimeout(() => { btn.classList.remove("done"); label(); }, 1800);
@@ -479,8 +608,16 @@ document.addEventListener("click", (e) => {
      (a page opened from the terminal is one), so when the tab stays open the button names the shortcut instead. */
   const acts = Object.assign(document.createElement("span"), { className: "acts" });
   const close = Object.assign(document.createElement("button"), { className: "close-tab", type: "button", textContent: "Close tab", hidden: true });
+  /* Served, Send results gets a Copy button before it, for when the answers should go somewhere else too. */
+  const copier = Object.assign(document.createElement("button"), { className: "copy-one", type: "button", textContent: "Copy", hidden: true });
+  copier.addEventListener("click", async () => {
+    await copy(text());
+    copier.textContent = "Copied";
+    copier.classList.add("done");
+    setTimeout(() => { copier.classList.remove("done"); copier.textContent = "Copy"; }, 1800);
+  });
   btn.before(acts);
-  acts.append(btn, close);
+  acts.append(copier, btn, close);
   close.addEventListener("click", () => {
     window.close();
     setTimeout(() => { close.textContent = /Mac|iP/.test(navigator.platform) ? "Press \u2318W" : "Press Ctrl+W"; }, 300);
@@ -496,6 +633,7 @@ document.addEventListener("click", (e) => {
     if (m) m.animate(close, { opacity: [0, 1], x: [-12, 0], scale: [0.9, 1] }, { type: "spring", bounce: 0.35, duration: 0.5 });
   };
   label();
+  track();
   if (location.protocol !== "file:") fetch("/__prism").then((r) => { live = r.status === 204; label(); }, () => {});
 })();
 </script>

@@ -32,6 +32,7 @@ for t in daylight-report midnight-report decision-page; do grep -q '<p class="on
 grep -q "next-q" "$root/templates/decision-page.html" || fail "decision page has no Next question button"
 grep -q "collect-answers.py" "$root/hooks/always.md" || fail "send results rule missing"
 grep -q "/__prism" "$root/templates/decision-page.html" || fail "decision page cannot send results"
+grep -q "copy-one" "$root/templates/decision-page.html" || fail "decision page has no Copy next to Send results"
 python3 "$root/scripts/collect-answers.py" -h >/dev/null || fail "collect-answers.py broken"
 for t in daylight-report midnight-report decision-page; do grep -q "history.replaceState" "$root/templates/$t.html" || fail "$t in-page jumps add history (blocks Close tab)"; done
 for t in daylight-report midnight-report decision-page; do awk '/<div class="wrap">/{getline n; if (n !~ /report-back/) exit 1; exit 0}' "$root/templates/$t.html" || fail "$t back link is outside the content column"; done
