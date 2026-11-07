@@ -25,7 +25,7 @@ Paths below are relative to this skill's base directory (the Skill tool prints i
 6. **Iterations and choices.** Latest round on top, earlier rounds collapsed below; choices get a decision page ([references/decisions-and-iterations.md](references/decisions-and-iterations.md)).
 7. **File and index it.** Save it in the repo's `docs/` section (`docs/reports/`, `docs/design/`, `docs/decisions/`, or a section the repo already has) as `YYYY-MM-DD-topic.html`; run the index script on that section and the hub on `docs/` ([references/index.md](references/index.md)).
 8. **Check it** ([references/checks.md](references/checks.md)): render at 1440px and 390px, click the interactive parts, confirm every view agrees, run the impeccable detector, no em dashes.
-9. **Hand over** with markdown links that have a 🔗 label and a full file:// URL: the page, its index, and the hub when there is one.
+9. **Hand over** with markdown links that have a 🔗 label and a full file:// URL: the page, its index, and the hub when there is one, then open it in the browser: `python3 -m webbrowser -t "file://<abs path>"` (decision pages open through collect-answers.py instead; when one run writes or fixes several pages, open their index once, not every page).
 
 ## Musts
 

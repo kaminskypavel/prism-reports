@@ -31,6 +31,7 @@ grep -q "One thing" "$root/hooks/always.md" || fail "one thing rule missing"
 for t in daylight-report midnight-report decision-page; do grep -q '<p class="one"><mark>' "$root/templates/$t.html" || fail "$t has no highlighted One thing"; done
 grep -q "next-q" "$root/templates/decision-page.html" || fail "decision page has no Next question button"
 grep -q "collect-answers.py" "$root/hooks/always.md" || fail "send results rule missing"
+grep -q "python3 -m webbrowser" "$root/hooks/always.md" || fail "open-in-browser rule missing"
 grep -q "/__prism" "$root/templates/decision-page.html" || fail "decision page cannot send results"
 grep -q "copy-one" "$root/templates/decision-page.html" || fail "decision page has no Copy next to Send results"
 python3 "$root/scripts/collect-answers.py" -h >/dev/null || fail "collect-answers.py broken"
