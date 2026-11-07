@@ -30,6 +30,9 @@ grep -q "done-toast" "$root/templates/decision-page.html" && fail "decision page
 grep -q "One thing" "$root/hooks/always.md" || fail "one thing rule missing"
 for t in daylight-report midnight-report decision-page; do grep -q '<p class="one"><mark>' "$root/templates/$t.html" || fail "$t has no highlighted One thing"; done
 grep -q "next-q" "$root/templates/decision-page.html" || fail "decision page has no Next question button"
+grep -q "collect-answers.py" "$root/hooks/always.md" || fail "send results rule missing"
+grep -q "/__prism" "$root/templates/decision-page.html" || fail "decision page cannot send results"
+python3 "$root/scripts/collect-answers.py" -h >/dev/null || fail "collect-answers.py broken"
 for t in daylight-report midnight-report decision-page; do grep -q "history.replaceState" "$root/templates/$t.html" || fail "$t in-page jumps add history (blocks Close tab)"; done
 for t in daylight-report midnight-report decision-page; do awk '/<div class="wrap">/{getline n; if (n !~ /report-back/) exit 1; exit 0}' "$root/templates/$t.html" || fail "$t back link is outside the content column"; done
 grep -q "budget:" "$root/scripts/check-report.mjs" || fail "check-report has no word budget"

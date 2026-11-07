@@ -34,7 +34,7 @@ Paths below are relative to this skill's base directory (the Skill tool prints i
 - Minimal: light paper page, white surfaces with 1px borders, ink text, color only where it means something (good, caution, risk) or to tell stat cards and chart series apart. No gradient tiles, no white text on light fills, no colored left borders, no emoji or Unicode glyphs as icons.
 - The call to action is the One thing block: a stronger ink border, the one thing under a yellow highlighter stroke, solid ink step numbers. The highlighter is its only color.
 - Tables sort; filters only where the reader will slice; wide tables scroll inside their panel on phones.
-- Latest iteration on top. Anything the user must pick, approve or answer renders as a decision page: click to answer, Copy results in the sticky top bar.
+- Latest iteration on top. Anything the user must pick, approve or answer renders as a decision page: click to answer, Send results in the sticky top bar, served by `scripts/collect-answers.py` so the answers come straight back (opened as a file: Copy results).
 - Compact: one HTML file; libraries from a pinned CDN (`cdn.jsdelivr.net/npm/<pkg>@<x.y.z>`), never inlined; images as small downscaled data URIs or files next to the page; no external fonts.
 - Every page is in an index, and the handover links the index too.
 - Text never below 12px; contrast 4.5:1 for text; no em dashes anywhere.

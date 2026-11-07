@@ -188,7 +188,7 @@ nav.toc .pill{position:absolute;top:10px;left:0;height:31px;border-radius:999px;
 
   <div class="cta">
     <p class="one-h">One thing</p>
-    <p class="one"><mark>Answer 2 questions, then Copy results (top right) and paste it in the chat.</mark></p>
+    <p class="one"><mark>Answer 2 questions, then <span class="verb">Send results</span> (top right).</mark></p>
     <ol class="next">
       <li><div><b><a href="#round-2">Which option should we ship?</a></b><span>B recommended</span></div></li>
       <li><div><b><a href="#ship">Ship it this week?</a></b><span>Yes recommended</span></div></li>
@@ -383,7 +383,8 @@ document.addEventListener("click", (e) => {
 <script>
 /* Answers: every .opts[data-q] is one question (add data-multi to allow several picks); its .opt[data-key][data-name] cards have Pick buttons.
    Each question gets a note box. The Copy results button in the sticky nav copies every answer as one block to paste back in the chat.
-   Answers are remembered per page. */
+   Served by scripts/collect-answers.py (it answers GET /__prism), it becomes Send results: one click posts the answers to the waiting
+   agent and closes the tab, nothing to paste. Answers are remembered per page. */
 (() => {
   const qs = [...document.querySelectorAll(".opts[data-q]")];
   const btn = document.querySelector(".copy-all");
@@ -394,8 +395,11 @@ document.addEventListener("click", (e) => {
   const title = (document.querySelector("h1")?.textContent || document.title).trim();
   const picks = (g) => [...g.querySelectorAll(".opt.on")];
   const note = (g) => g.nextElementSibling.value.trim();
+  let live = false;
+  const verb = () => (live ? "Send results" : "Copy results");
   const label = () => {
-    btn.textContent = `Copy results · ${qs.filter((g) => picks(g).length).length}/${qs.length}`;
+    btn.textContent = `${verb()} · ${qs.filter((g) => picks(g).length).length}/${qs.length}`;
+    for (const e of [nexts.at(-1), ...document.querySelectorAll(".verb")]) e.textContent = verb(); // .verb: the button's name in the One thing
     qs.forEach((g, i) => nexts[i]?.classList.toggle("ready", picks(g).length > 0));
   };
   const save = () => {
@@ -452,6 +456,17 @@ document.addEventListener("click", (e) => {
   ].join("\n");
   btn.addEventListener("click", async () => {
     const t = text();
+    if (live) {
+      live = await fetch("/__prism", { method: "POST", body: t }).then((r) => r.ok, () => false);
+      if (live) {
+        live = false; // the server exits after one answer; later clicks copy
+        btn.textContent = "Sent";
+        btn.classList.add("done");
+        window.close();
+        setTimeout(showClose, 300);
+        return;
+      }
+    }
     try { await navigator.clipboard.writeText(t); }
     catch { const a = document.createElement("textarea"); a.value = t; document.body.append(a); a.select(); document.execCommand("copy"); a.remove(); }
     btn.textContent = "Copied, paste in chat";
@@ -481,6 +496,7 @@ document.addEventListener("click", (e) => {
     if (m) m.animate(close, { opacity: [0, 1], x: [-12, 0], scale: [0.9, 1] }, { type: "spring", bounce: 0.35, duration: 0.5 });
   };
   label();
+  if (location.protocol !== "file:") fetch("/__prism").then((r) => { live = r.status === 204; label(); }, () => {});
 })();
 </script>
 <script>
