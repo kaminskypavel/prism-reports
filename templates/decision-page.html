@@ -150,6 +150,12 @@ summary{cursor:pointer;font-weight:600}details[open] summary{margin-bottom:12px}
 .opt>p{margin:0;color:var(--mute);font-size:14px}
 .preview{background:var(--soft);border-radius:10px;overflow:hidden;min-height:200px;display:grid;place-items:center;color:var(--mute);font-size:13px;padding:12px;text-align:center}
 .preview img{width:100%;height:auto;display:block}
+/* Full size: every image in an option card gets a small expand button (top right) that opens it full size over the page; click or Esc closes. */
+.zoomable{position:relative;display:block}
+.zoom{position:absolute;top:6px;right:6px;width:28px;height:28px;padding:0;border:0;border-radius:8px;background:rgba(20,20,20,.6);color:#fff;display:grid;place-items:center;cursor:zoom-in;opacity:.85;transition:opacity .15s}
+.zoom:hover,.zoom:focus-visible{opacity:1}.zoom:focus-visible{outline:2px solid #fff;outline-offset:-4px}.zoom svg{width:15px;height:15px}
+dialog.zoom-box{padding:0;border:0;background:none;max-width:96vw;max-height:96vh;overflow:visible;cursor:zoom-out}dialog.zoom-box::backdrop{background:rgba(10,10,10,.82)}
+dialog.zoom-box img{display:block;max-width:96vw;max-height:94vh;width:auto;height:auto;border-radius:8px}
 .pc{margin:0;padding:0;list-style:none;font-size:14px;display:grid;gap:4px}
 .pc li{position:relative;padding-left:18px}
 .pc li::before{content:"";position:absolute;left:0;top:.55em;width:7px;height:7px;border-radius:50%;background:var(--good)}.pc li.con::before{background:var(--bad)}
@@ -456,6 +462,27 @@ document.addEventListener("click", (e) => {
   };
   const ro = new ResizeObserver(() => ms.forEach(fit));
   ms.forEach((m) => ro.observe(m.parentElement));
+})();
+/* Full size (see .zoom in the CSS): the button opens the image's link target when it has one, else the image itself. data-nozoom opts out. */
+(() => {
+  const imgs = [...document.querySelectorAll(".opt img, .preview img")].filter((i) => !i.closest("[data-nozoom]"));
+  if (!imgs.length) return;
+  const box = Object.assign(document.createElement("dialog"), { className: "zoom-box" });
+  box.innerHTML = '<img alt="">';
+  box.addEventListener("click", () => box.close());
+  document.body.append(box);
+  for (const img of imgs) {
+    const at = img.closest("a") || img, wrap = Object.assign(document.createElement("span"), { className: "zoomable" });
+    const b = Object.assign(document.createElement("button"), { className: "zoom", type: "button" });
+    b.setAttribute("aria-label", `Full size: ${img.alt || "image"}`);
+    b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>';
+    b.addEventListener("click", () => {
+      Object.assign(box.firstChild, { src: img.closest("a")?.href || img.currentSrc || img.src, alt: img.alt });
+      box.showModal();
+    });
+    at.before(wrap);
+    wrap.append(at, b);
+  }
 })();
 /* Answers: every .opts[data-q] is one question (add data-multi to allow several picks); its .opt[data-key][data-name] cards have Pick buttons.
    data-rows instead: .row[data-row] groups of small .opt tiles, one pick per row (approve a set item by item), plus a Redo tile and a note per row.
