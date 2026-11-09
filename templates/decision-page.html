@@ -197,7 +197,7 @@ nav.toc .acts .done{background:var(--good);border-color:var(--good);color:var(--
 .pics::after{content:"Copy results leaves images out; Send results takes them.";flex-basis:100%;font-size:12.5px;color:var(--mute)}body.live .pics::after{display:none}
 .row .pics{grid-column:2;margin:0}@media (max-width:640px){.row .pics{grid-column:1}}
 .gnote{margin:32px 0 0;padding:22px 0 0;border-top:1px solid var(--line)}
-.gnote label{display:block;font-size:17px;font-weight:700;letter-spacing:-.01em}
+.gnote label{display:block;font-size:17px;font-weight:700;letter-spacing:-.01em}.gnote label span{font-weight:500;color:var(--mute)}
 .gnote p{margin:2px 0 0;font-size:14px;color:var(--mute)}.gnote .qnote{min-height:88px}
 /* Multi-select questions (data-multi): a bar above the options with the count and Select all / Deselect all. */
 .qbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 10px;font-size:13.5px;color:var(--mute);font-variant-numeric:tabular-nums}
@@ -523,7 +523,7 @@ document.addEventListener("click", (e) => {
     fin.innerHTML = verb() + icon;
     for (const e of document.querySelectorAll(".verb")) e.textContent = verb(); // .verb: the button's name in the One thing
     btn.classList.toggle("ready", all);
-    qs.forEach((g, i) => nexts[i].classList.toggle("ready", done(g)));
+    qs.forEach((g, i) => nexts[i]?.classList.toggle("ready", done(g)));
     fin.classList.toggle("ready", all);
     copier.hidden = !live;
     document.body.classList.toggle("live", live);
@@ -652,8 +652,8 @@ document.addEventListener("click", (e) => {
       bars.set(g, bar);
     }
   }
-  /* Next question: a button under each question's note box jumps to the next question; the last one to the general note,
-     "Anything else?", whose button sends (or copies) the results. */
+  /* Next question: a button under each question's note box jumps to the next question. The last question has none: under it sits
+     the general note, "Anything else? (optional)", skippable, then the button that sends (or copies) the results. */
   const smooth = () => (matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth");
   const spot = (g) => { const s = g.closest("section"); return s && s.querySelector(".opts[data-q]") === g ? s : g; }; // a question's section, when it leads it
   const go = (g) => spot(g).scrollIntoView({ behavior: smooth() });
@@ -669,23 +669,24 @@ document.addEventListener("click", (e) => {
   const plane = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 1.5 7 9M14.5 1.5 10 14.5 7 9 1.5 6z"/></svg>';
   const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3v10M3.5 8.5 8 13l4.5-4.5"/></svg>';
   const gbox = Object.assign(document.createElement("div"), { className: "gnote" });
-  gbox.innerHTML = '<label for="gnote">Anything else?</label><p>A note on the whole page, sent with your answers.</p>';
+  gbox.innerHTML = '<label for="gnote">Anything else? <span>(optional)</span></label><p>A note on the whole page, sent with your answers. Skip it if there is nothing to add.</p>';
   const general = noteBox(saved.__page?.note, "Anything else? A note on the whole page", "Add a general note or paste images (optional)");
   general.id = "gnote";
   const toGeneral = () => { gbox.scrollIntoView({ behavior: smooth(), block: "center" }); general.focus({ preventScroll: true }); };
   const nexts = qs.map((g, i) => {
     const n = qs[i + 1];
+    if (!n) return null; // the last question goes straight on to the optional general note and Send results
     const b = Object.assign(document.createElement("button"), { className: "next-q", type: "button" });
-    b.innerHTML = `${n ? "Next question" : "Next: general note"} ${arrow}`;
-    if (n) b.setAttribute("aria-label", `Next question: ${n.dataset.q}`);
-    b.addEventListener("click", () => (n ? go(n) : toGeneral()));
+    b.innerHTML = `Next question ${arrow}`;
+    b.setAttribute("aria-label", `Next question: ${n.dataset.q}`);
+    b.addEventListener("click", () => go(n));
     notes.get(g).after(b);
     return b;
   });
   const fin = Object.assign(document.createElement("button"), { className: "next-q send", type: "button" });
   fin.addEventListener("click", () => btn.click());
   gbox.append(general, fin);
-  nexts.at(-1).after(gbox);
+  notes.get(qs.at(-1)).after(gbox);
   /* Question wizard (see .wiz in the CSS): one step per question plus the general note, kept current by label() and on scroll. */
   const wiz = Object.assign(document.createElement("nav"), { className: "wiz" });
   wiz.setAttribute("aria-label", "Questions");
@@ -700,7 +701,7 @@ document.addEventListener("click", (e) => {
     return li;
   };
   const steps = qs.map((g, i) => step(g.dataset.q, i + 1, () => go(g)));
-  const gstep = step("Anything else?", "", toGeneral);
+  const gstep = step("Anything else? (optional)", "", toGeneral);
   gstep.classList.add("extra");
   document.body.append(wiz);
   const track = () => {
