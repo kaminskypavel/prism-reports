@@ -37,6 +37,14 @@ for (const [w, h] of [[1440, 900], [390, 844]]) {
     const out = n === 1 ? [] : [`budget: the .cta needs exactly one p.one (the One thing), found ${n}`];
     for (const [sel, cap] of [[".one", 15], [".lede", 25], [".next li", 14], [".thesis", 20]])
       for (const el of own(sel)) if (words(el) > cap) out.push(`budget: ${sel} has ${words(el)} words, cap ${cap}: "${el.textContent.trim().slice(0, 70)}"`);
+    // An option's visual sits in its own card: a figure captioned with an option's name, outside the cards, splits the pick from what it picks.
+    for (const g of document.querySelectorAll(".opts[data-q]")) {
+      const names = new Set([...g.querySelectorAll(".opt")].flatMap((o) => [o.dataset.key, o.dataset.name, o.querySelector(".opt-h b")?.textContent]).filter(Boolean).map((t) => t.trim().toLowerCase()));
+      for (const f of (g.closest("section") || document).querySelectorAll("figure")) {
+        const c = f.querySelector("figcaption")?.textContent.trim();
+        if (c && !f.closest(".opt") && names.has(c.toLowerCase())) out.push(`split: "${c}" is shown outside its option card in "${g.dataset.q}"; move it into that card's .preview`);
+      }
+    }
     return out;
   }));
   const name = basename(file, ".html") === "index" ? basename(dirname(resolve(file))) : basename(file, ".html"); // folder pages: name after the folder

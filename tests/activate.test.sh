@@ -40,6 +40,7 @@ python3 "$root/scripts/collect-answers.py" -h >/dev/null || fail "collect-answer
 for t in daylight-report midnight-report decision-page; do grep -q "history.replaceState" "$root/templates/$t.html" || fail "$t in-page jumps add history (blocks Close tab)"; done
 for t in daylight-report midnight-report decision-page; do awk '/<div class="wrap">/{getline n; if (n !~ /report-back/) exit 1; exit 0}' "$root/templates/$t.html" || fail "$t back link is outside the content column"; done
 grep -q "budget:" "$root/scripts/check-report.mjs" || fail "check-report has no word budget"
+grep -q "split:" "$root/scripts/check-report.mjs" || fail "check-report does not catch previews split from their options"
 for t in daylight-report midnight-report decision-page; do grep -q "Facelift motion" "$root/templates/$t.html" || fail "$t has no facelift motion script"; done
 
 # without CLAUDE_PLUGIN_ROOT it resolves its own install folder
