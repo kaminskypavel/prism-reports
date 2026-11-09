@@ -34,6 +34,8 @@ grep -q "collect-answers.py" "$root/hooks/always.md" || fail "send results rule 
 grep -q "python3 -m webbrowser" "$root/hooks/always.md" || fail "open-in-browser rule missing"
 grep -q "/__prism" "$root/templates/decision-page.html" || fail "decision page cannot send results"
 grep -q "copy-one" "$root/templates/decision-page.html" || fail "decision page has no Copy next to Send results"
+grep -q "data-rows" "$root/templates/decision-page.html" || fail "decision page has no row picks"
+grep -q "row picks" "$root/hooks/always.md" || fail "row picks rule missing"
 python3 "$root/scripts/collect-answers.py" -h >/dev/null || fail "collect-answers.py broken"
 for t in daylight-report midnight-report decision-page; do grep -q "history.replaceState" "$root/templates/$t.html" || fail "$t in-page jumps add history (blocks Close tab)"; done
 for t in daylight-report midnight-report decision-page; do awk '/<div class="wrap">/{getline n; if (n !~ /report-back/) exit 1; exit 0}' "$root/templates/$t.html" || fail "$t back link is outside the content column"; done

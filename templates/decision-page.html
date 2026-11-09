@@ -161,8 +161,8 @@ summary{cursor:pointer;font-weight:600}details[open] summary{margin-bottom:12px}
 /* Focus: in an answered single-pick question the cards you did not pick fade (no blur); in the questions area every question but the one
    on screen fades (.away, set by the script). Dim only, never blur: the reader asked for it. Keyboard focus brings any of them back; hover mostly does, after a beat. */
 .opts[data-q] .opt,.away{transition:opacity .3s}
-.opts:has(.opt.on):not([data-multi]) .opt:not(.on){opacity:.45}.away{opacity:.4}
-.opts:has(.opt.on):not([data-multi]) .opt:not(.on):is(:hover,:focus-within),.away:focus-within{opacity:1}
+.opts:has(.opt.on):not([data-multi],[data-rows]) .opt:not(.on){opacity:.45}.away{opacity:.4}
+.opts:has(.opt.on):not([data-multi],[data-rows]) .opt:not(.on):is(:hover,:focus-within),.away:focus-within{opacity:1}
 .away:hover{opacity:.85;transition-delay:.25s} /* a resting mouse should not undo focus at once */
 /* answers: Copy results (Send results when served, with a Copy button before it) pinned at the right of the sticky nav, and after
    a copy a Close tab button right next to it (the script wraps them in .acts; Close tab springs in with Motion). A note box under each question. */
@@ -189,6 +189,27 @@ nav.toc .acts .done{background:var(--good);border-color:var(--good);color:var(--
 .qbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 10px;font-size:13.5px;color:var(--mute);font-variant-numeric:tabular-nums}
 .qbar button{font:inherit;font-weight:600;color:var(--ink);background:none;border:0;padding:4px 2px;cursor:pointer;text-decoration:underline;text-decoration-color:var(--scroll);text-underline-offset:3px}
 .qbar button:hover{text-decoration-color:var(--ink)}.qbar button:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:4px}
+/* Row picks (data-rows): approve a set item by item, one pick per row (one still per character). Each .row[data-row] holds small
+   .opt tiles; the script adds the row name, a Redo tile and a note per row, and a bar with Pick all recommended. Click a tile to pick it. */
+.opts[data-rows]{display:block}
+.row{display:grid;grid-template-columns:140px minmax(0,1fr);gap:8px 18px;padding:16px 0;border-top:1px solid var(--line)}
+.row:first-child{border-top:0;padding-top:4px}
+.row-h{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding-top:2px}
+.row-h b{font-size:15px;letter-spacing:-.01em}
+.row-t{display:flex;flex-wrap:wrap;gap:10px}.row-t>.opt{flex:0 1 240px;min-width:0}
+.opts[data-rows] .opt{padding:6px 6px 8px;gap:6px;cursor:pointer}
+.opts[data-rows] .opt img{width:100%;height:auto;border-radius:7px;display:block;background:var(--soft)}
+.opts[data-rows] .opt-h{gap:4px 6px;padding:0 2px}.opts[data-rows] .opt-h b{font-size:13.5px}.opts[data-rows] .chip{font-size:11px}
+.opts[data-rows] .opt>p{font-size:12.5px;padding:0 2px}
+.opts[data-rows] .pick{font-size:13px;padding:6px 10px;border-radius:8px}
+.opts[data-rows] .redo{border-style:dashed}
+.redo-i{flex:1;min-height:120px;display:grid;place-items:center;border-radius:7px;background:var(--soft);color:var(--mute)}.redo-i svg{width:40px;height:40px}
+.redo.on .redo-i{color:var(--ink)}
+.row:has(.opt.on) .opt:not(.on){opacity:.45}.row .opt:not(.on):is(:hover,:focus-within){opacity:1}
+.row-add{font:inherit;font-size:12.5px;font-weight:600;color:var(--mute);background:none;border:0;padding:2px 0;cursor:pointer;text-decoration:underline;text-decoration-color:var(--scroll);text-underline-offset:3px}
+.row-add:hover{color:var(--ink)}.row .qnote{grid-column:2;margin:0}.row .qnote[hidden],.row-add[hidden]{display:none}
+@media (max-width:640px){.row{grid-template-columns:1fr}.row-h{flex-direction:row;justify-content:space-between;align-items:baseline}.row-t>.opt{flex:1 1 calc(50% - 5px)}
+  .opts[data-rows] .redo{flex:1 1 100%;flex-direction:row;align-items:center;text-align:left}.redo>p{flex:1}.redo-i{flex:0 0 40px;min-height:40px}.redo-i svg{width:20px;height:20px}.redo .pick{width:auto;margin:0}.row .qnote{grid-column:1}}
 /* Question wizard: on screens 1180px and wider, a docked white panel down the left edge, there from the start; the page sits beside it.
    Every question is a step with your answer, the one on screen in bold, click to jump, a last step for the general note. Phones use Next question. */
 .wiz{display:none}
@@ -424,6 +445,7 @@ document.addEventListener("click", (e) => {
 </script>
 <script>
 /* Answers: every .opts[data-q] is one question (add data-multi to allow several picks); its .opt[data-key][data-name] cards have Pick buttons.
+   data-rows instead: .row[data-row] groups of small .opt tiles, one pick per row (approve a set item by item), plus a Redo tile and a note per row.
    Each question gets a note box (multi-select ones also a Select all bar), and the last one is followed by a general note, "Anything else?".
    A docked step list (the wizard) tracks them, and focus dims every question but the one on screen. The Copy results button in the sticky nav copies every answer as one block to paste back in the chat.
    Served by scripts/collect-answers.py (it answers GET /__prism), it becomes Send results: one click posts the answers to the waiting
@@ -437,10 +459,14 @@ document.addEventListener("click", (e) => {
   try { saved = JSON.parse(localStorage.getItem(store)) || {}; } catch {}
   const title = (document.querySelector("h1")?.textContent || document.title).trim();
   const picks = (g) => [...g.querySelectorAll(".opt.on")];
-  const notes = new Map(), bars = new Map(); // question -> its note box / its Select all bar
+  const notes = new Map(), bars = new Map(), rnotes = new Map(); // question -> its note box / its bar; row -> its note box
   const note = (g) => notes.get(g).value.trim();
   const flat = (t) => t.replace(/\s*\n\s*/g, " / "); // one line per answer in the results
-  const answered = () => qs.filter((g) => picks(g).length).length;
+  const rowsOf = (g) => [...g.querySelectorAll(".row[data-row]")];
+  const rowOf = (o) => o.closest(".row[data-row]");
+  const id = (o) => (rowOf(o) ? `${rowOf(o).dataset.row}: ${o.dataset.key}` : o.dataset.key); // saved pick
+  const done = (g) => (rowsOf(g).length ? rowsOf(g).every((r) => r.querySelector(".opt.on")) : picks(g).length > 0);
+  const answered = () => qs.filter(done).length;
   let live = false;
   const verb = () => (live ? "Send results" : "Copy results");
   const label = () => {
@@ -449,16 +475,18 @@ document.addEventListener("click", (e) => {
     fin.innerHTML = verb() + icon;
     for (const e of document.querySelectorAll(".verb")) e.textContent = verb(); // .verb: the button's name in the One thing
     btn.classList.toggle("ready", all);
-    qs.forEach((g, i) => nexts[i].classList.toggle("ready", picks(g).length > 0));
+    qs.forEach((g, i) => nexts[i].classList.toggle("ready", done(g)));
     fin.classList.toggle("ready", all);
     copier.hidden = !live;
     for (const [g, bar] of bars) {
-      const n = picks(g).length, all = choices(g).length;
+      const rs = rowsOf(g), n = rs.length ? rs.filter((r) => r.querySelector(".opt.on")).length : picks(g).length;
+      const all = rs.length || choices(g).length;
       bar.firstChild.textContent = `${n} of ${all} picked`;
-      bar.lastChild.textContent = n === all ? "Deselect all" : "Select all";
+      bar.lastChild.textContent = rs.length ? (fill(g) ? (n ? "Recommended for the rest" : "Pick all recommended") : "Clear all") : n === all ? "Deselect all" : "Select all";
+      bar.lastChild.hidden = rs.length > 0 && !n && !fill(g);
     }
     steps.forEach((li, i) => {
-      li.classList.toggle("done", picks(qs[i]).length > 0);
+      li.classList.toggle("done", done(qs[i]));
       li.querySelector(".wa").textContent = named(qs[i]);
     });
     gstep.classList.toggle("done", !!general.value.trim());
@@ -468,7 +496,10 @@ document.addEventListener("click", (e) => {
   };
   const save = () => {
     label();
-    const all = Object.fromEntries(qs.map((g) => [g.dataset.q, { picks: picks(g).map((o) => o.dataset.key), note: note(g) }]));
+    const all = Object.fromEntries(qs.map((g) => [g.dataset.q, {
+      picks: picks(g).map(id), note: note(g),
+      rows: Object.fromEntries(rowsOf(g).map((r) => [r.dataset.row, rnotes.get(r).value.trim()])),
+    }]));
     try { localStorage.setItem(store, JSON.stringify({ ...all, __page: { note: general.value.trim() } })); } catch {}
   };
   const mark = (o, on) => {
@@ -478,6 +509,7 @@ document.addEventListener("click", (e) => {
     b.setAttribute("aria-pressed", on);
   };
   const choices = (g) => [...g.querySelectorAll(".opt[data-key]")].filter((o) => o.querySelector(".pick"));
+  const fill = (g) => rowsOf(g).some((r) => !r.querySelector(".opt.on") && r.querySelector(".opt.rec")); // rows Pick all recommended can fill
   const grow = (t) => { t.style.height = "auto"; t.style.height = `${t.scrollHeight + 2}px`; };
   const noteBox = (value, name, placeholder) => {
     const t = Object.assign(document.createElement("textarea"), { className: "qnote", rows: 1, placeholder, value: value || "" });
@@ -492,24 +524,49 @@ document.addEventListener("click", (e) => {
     const box = noteBox(s.note, `Note on: ${g.dataset.q}`, "Add a note (optional)");
     notes.set(g, box);
     g.after(box);
+    for (const r of rowsOf(g)) { // row picks: name and Add note on the left, the tiles plus a Redo tile, the row's note under them
+      const tiles = Object.assign(document.createElement("div"), { className: "row-t" });
+      tiles.append(...r.querySelectorAll(":scope > .opt"));
+      tiles.insertAdjacentHTML("beforeend", '<article class="opt redo" data-key="Redo"><div class="redo-i" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></div><div class="opt-h"><b>Redo</b></div><p>Fix it in a note</p><button class="pick" type="button">Pick</button></article>');
+      const h = Object.assign(document.createElement("div"), { className: "row-h" });
+      h.innerHTML = '<b></b><button class="row-add" type="button">Add note</button>';
+      h.firstChild.textContent = r.dataset.row;
+      const t = noteBox((s.rows || {})[r.dataset.row], `Note on: ${r.dataset.row}`, `What should change in ${r.dataset.row}?`);
+      t.hidden = !t.value;
+      h.lastChild.hidden = !t.hidden;
+      h.lastChild.addEventListener("click", () => { t.hidden = false; h.lastChild.hidden = true; grow(t); t.focus(); });
+      r.append(h, tiles, t);
+      rnotes.set(r, t);
+    }
     for (const o of choices(g)) {
       const b = o.querySelector(".pick");
       b.dataset.label = b.textContent;
-      mark(o, (s.picks || []).includes(o.dataset.key));
+      mark(o, (s.picks || []).includes(id(o)));
       b.addEventListener("click", () => {
-        const on = !o.classList.contains("on");
-        if (!g.hasAttribute("data-multi")) for (const x of picks(g)) mark(x, false);
+        const on = !o.classList.contains("on"), r = rowOf(o);
+        if (!g.hasAttribute("data-multi")) for (const x of picks(r || g)) mark(x, false);
         mark(o, on);
+        if (on && r && o.classList.contains("redo")) { const t = rnotes.get(r); if (t.hidden) r.querySelector(".row-add").click(); else t.focus(); } // Redo opens its note
         save();
         motion();
       });
+      if (rowOf(o)) o.addEventListener("click", (e) => { if (!e.target.closest("a, button, textarea")) b.click(); }); // a tile picks anywhere
     }
-    if (g.hasAttribute("data-multi")) {
+    if (g.hasAttribute("data-multi") || rowsOf(g).length) {
       const bar = Object.assign(document.createElement("div"), { className: "qbar" });
       bar.innerHTML = '<span></span><button type="button"></button>';
       bar.lastChild.addEventListener("click", () => {
-        const on = picks(g).length < choices(g).length;
-        for (const o of choices(g)) mark(o, on);
+        if (rowsOf(g).length) {
+          const f = fill(g); // fill every empty row with its Recommended tile, or clear all when nothing is left to fill
+          for (const r of rowsOf(g)) {
+            const rec = r.querySelector(".opt.rec");
+            if (!f) for (const x of picks(r)) mark(x, false);
+            else if (rec && !picks(r).length) mark(rec, true);
+          }
+        } else {
+          const on = picks(g).length < choices(g).length;
+          for (const o of choices(g)) mark(o, on);
+        }
         save();
         motion();
       });
@@ -523,8 +580,14 @@ document.addEventListener("click", (e) => {
   const spot = (g) => { const s = g.closest("section"); return s && s.querySelector(".opts[data-q]") === g ? s : g; }; // a question's section, when it leads it
   const go = (g) => spot(g).scrollIntoView({ behavior: smooth() });
   const block = (g) => { const s = g.closest("section"); return s && s.querySelectorAll(".opts[data-q]").length === 1 ? s : g; }; // what focus dims
-  const answer = (g) => picks(g).map((o) => (o.dataset.name ? `${o.dataset.key} (${o.dataset.name})` : o.dataset.key));
-  const named = (g) => picks(g).map((o) => (o.querySelector(".opt-h b")?.textContent || o.dataset.name || o.dataset.key).trim()).join(", ");
+  const tname = (o) => (o.querySelector(".opt-h b")?.textContent || o.dataset.name || o.dataset.key).trim();
+  const row = (r, full) => { // "Geek: Try 1", with its note when full
+    const o = r.querySelector(".opt.on"), n = rnotes.get(r).value.trim();
+    return `${r.dataset.row}: ${o ? tname(o) : "no pick"}${full && n ? ` (note: ${flat(n)})` : ""}`;
+  };
+  const answer = (g) => (rowsOf(g).length ? (picks(g).length ? [rowsOf(g).map((r) => row(r, true)).join("; ")] : [])
+    : picks(g).map((o) => (o.dataset.name ? `${o.dataset.key} (${o.dataset.name})` : o.dataset.key)));
+  const named = (g) => (rowsOf(g).length ? rowsOf(g).filter((r) => r.querySelector(".opt.on")).map((r) => row(r)) : picks(g).map(tname)).join(", ");
   const plane = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 1.5 7 9M14.5 1.5 10 14.5 7 9 1.5 6z"/></svg>';
   const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3v10M3.5 8.5 8 13l4.5-4.5"/></svg>';
   const gbox = Object.assign(document.createElement("div"), { className: "gnote" });
