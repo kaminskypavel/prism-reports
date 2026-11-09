@@ -35,6 +35,7 @@ grep -q "python3 -m webbrowser" "$root/hooks/always.md" || fail "open-in-browser
 grep -q "/__prism" "$root/templates/decision-page.html" || fail "decision page cannot send results"
 grep -q "copy-one" "$root/templates/decision-page.html" || fail "decision page has no Copy next to Send results"
 grep -q "data-rows" "$root/templates/decision-page.html" || fail "decision page has no row picks"
+grep -q '".preview > \[data-w\]"' "$root/templates/decision-page.html" || fail "decision page previews do not fit their card"
 grep -q "row picks" "$root/hooks/always.md" || fail "row picks rule missing"
 python3 "$root/scripts/collect-answers.py" -h >/dev/null || fail "collect-answers.py broken"
 for t in daylight-report midnight-report decision-page; do grep -q "history.replaceState" "$root/templates/$t.html" || fail "$t in-page jumps add history (blocks Close tab)"; done

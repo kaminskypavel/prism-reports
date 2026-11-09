@@ -444,6 +444,19 @@ document.addEventListener("click", (e) => {
 })();
 </script>
 <script>
+/* Previews fit their card like a thumbnail: a live-HTML mock with its design width (data-w="460") is drawn at that width, then scaled
+   down (CSS zoom) to the card's width instead of being clipped. Images already scale. */
+(() => {
+  const ms = document.querySelectorAll(".preview > [data-w]");
+  const fit = (m) => {
+    const p = m.parentElement, cs = getComputedStyle(p);
+    const room = p.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    m.style.width = `${m.dataset.w}px`;
+    m.style.zoom = String(Math.min(1, room / m.dataset.w));
+  };
+  const ro = new ResizeObserver(() => ms.forEach(fit));
+  ms.forEach((m) => ro.observe(m.parentElement));
+})();
 /* Answers: every .opts[data-q] is one question (add data-multi to allow several picks); its .opt[data-key][data-name] cards have Pick buttons.
    data-rows instead: .row[data-row] groups of small .opt tiles, one pick per row (approve a set item by item), plus a Redo tile and a note per row.
    Each question gets a note box (multi-select ones also a Select all bar), and the last one is followed by a general note, "Anything else?".
