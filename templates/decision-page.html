@@ -181,7 +181,13 @@ nav.toc .acts .copy-all.ready,.next-q.send.ready,.next-q.send.ready:hover{backgr
 nav.toc .acts .done{background:var(--good);border-color:var(--good);color:var(--surface)}
 /* Next question: under each question's note box; jumps to the next question (the last one to the general note, whose button sends). Fills once answered. */
 .next-q{display:flex;align-items:center;gap:8px;width:max-content;margin:10px 0 0 auto;font:inherit;font-size:14px;font-weight:600;padding:8px 16px;border-radius:999px;border:1.5px solid var(--ink);background:var(--surface);color:var(--ink);cursor:pointer}
-.next-q:hover{background:var(--soft)}.next-q.ready,.next-q.ready:hover{background:var(--ink);color:var(--surface)}
+.next-q:hover{background:var(--soft)}.next-q kbd{font:600 11px/1 var(--font);opacity:.6;margin-left:2px}@media (hover:none){.next-q kbd{display:none}}
+/* Cmd+Enter confirmation: every answer as it will be sent, then Keep editing or Send results. */
+dialog.send-box{width:min(560px,calc(100vw - 32px));padding:22px;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.25)}
+dialog.send-box::backdrop{background:rgba(20,20,20,.35)}.send-box h3{margin:0 0 6px;font-size:18px;letter-spacing:-.01em}
+.send-box .sb-n{margin:0 0 10px;font-size:13.5px;color:var(--bad)}.send-box .sb-n:empty{display:none}
+.send-box pre{max-height:min(50vh,360px);overflow:auto;margin:0 0 16px;padding:12px;border-radius:10px;background:var(--soft);font:12.5px/1.5 ui-monospace,Menlo,monospace;white-space:pre-wrap}
+.sb-a{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}.sb-a .next-q{margin:0}.next-q.ready,.next-q.ready:hover{background:var(--ink);color:var(--surface)}
 .opts[data-q]{scroll-margin-top:72px}
 /* Notes: a box under each question, and one general note ("Anything else?") before the last Send results. They grow as you type. */
 .qnote{display:block;width:100%;min-height:42px;margin-top:10px;padding:10px 12px 10px 36px;font:inherit;font-size:14px;line-height:1.45;color:var(--ink);background:transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%235c5c56' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10.8 2.7l2.5 2.5-7.6 7.6-3.2.7.7-3.2z'/%3E%3C/svg%3E") 12px 13px/15px no-repeat;border:1px dashed var(--scroll);border-radius:10px;resize:none;overflow:hidden;transition:border-color .15s,background-color .15s,box-shadow .15s}
@@ -520,7 +526,7 @@ document.addEventListener("click", (e) => {
   const label = () => {
     const icon = live ? plane : "", all = answered() === qs.length;
     btn.innerHTML = `${verb()} · ${answered()}/${qs.length}${icon}`;
-    fin.innerHTML = verb() + icon;
+    fin.innerHTML = verb() + icon + kbd;
     for (const e of document.querySelectorAll(".verb")) e.textContent = verb(); // .verb: the button's name in the One thing
     btn.classList.toggle("ready", all);
     qs.forEach((g, i) => nexts[i]?.classList.toggle("ready", done(g)));
@@ -682,6 +688,7 @@ document.addEventListener("click", (e) => {
   const named = (g) => (rowsOf(g).length ? rowsOf(g).filter((r) => r.querySelector(".opt.on")).map((r) => row(r)) : picks(g).map(tname)).join(", ");
   const plane = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 1.5 7 9M14.5 1.5 10 14.5 7 9 1.5 6z"/></svg>';
   const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3v10M3.5 8.5 8 13l4.5-4.5"/></svg>';
+  const kbd = `<kbd>${/Mac|iP/.test(navigator.platform) ? "\u2318" : "Ctrl "}\u21b5</kbd>`; // the keyboard path, see Cmd+Enter below
   const gbox = Object.assign(document.createElement("div"), { className: "gnote" });
   gbox.innerHTML = '<label for="gnote">Anything else? <span>(optional)</span></label><p>A note on the whole page, sent with your answers. Skip it if there is nothing to add.</p>';
   const general = noteBox(saved.__page?.note, "Anything else? A note on the whole page", "Add a general note or paste images (optional)");
@@ -691,7 +698,7 @@ document.addEventListener("click", (e) => {
     const n = qs[i + 1];
     if (!n) return null; // the last question goes straight on to the optional general note and Send results
     const b = Object.assign(document.createElement("button"), { className: "next-q", type: "button" });
-    b.innerHTML = `Next question ${arrow}`;
+    b.innerHTML = `Next question ${arrow}${kbd}`;
     b.setAttribute("aria-label", `Next question: ${n.dataset.q}`);
     b.addEventListener("click", () => go(n));
     notes.get(g).after(b);
@@ -718,6 +725,7 @@ document.addEventListener("click", (e) => {
   const gstep = step("Anything else? (optional)", "", toGeneral);
   gstep.classList.add("extra");
   document.body.append(wiz);
+  let at = 0; // the step on screen: a question index, or qs.length for the general note
   const track = () => {
     let cur = 0;
     qs.forEach((g, i) => { if (spot(g).getBoundingClientRect().top < innerHeight / 2) cur = i; });
@@ -729,6 +737,7 @@ document.addEventListener("click", (e) => {
     });
     const inside = spot(qs[0]).getBoundingClientRect().top < innerHeight / 2; // focus starts once you reach the questions
     [...qs.map(block), gbox].forEach((el, i) => el.classList.toggle("away", inside && i !== cur));
+    at = inside ? cur : -1; // above the questions, the first Cmd+Enter goes to question 1
   };
   addEventListener("scroll", track, { passive: true });
   const text = () => [
@@ -736,6 +745,33 @@ document.addEventListener("click", (e) => {
     ...qs.map((g, i) => `${i + 1}. ${g.dataset.q}: ${answer(g).join(", ") || "no answer"}${said(notes.get(g)) ? `. Note: ${said(notes.get(g))}` : ""}`),
     ...(said(general) ? [`General note: ${said(general)}`] : []),
   ].join("\n");
+  /* Cmd+Enter (Ctrl+Enter): next question from wherever you are (focus first, else the one on screen), then the general note,
+     then a confirmation with every answer; Cmd+Enter or Enter there sends (or copies), Esc goes back. Clicking Send needs no confirmation. */
+  const sure = Object.assign(document.createElement("dialog"), { className: "send-box" });
+  sure.innerHTML = '<h3></h3><p class="sb-n"></p><pre></pre><div class="sb-a"><button class="next-q sb-no" type="button">Keep editing</button><button class="next-q send ready sb-go" type="button" autofocus></button></div>';
+  sure.querySelector(".sb-no").addEventListener("click", () => sure.close());
+  sure.querySelector(".sb-go").addEventListener("click", () => { sure.close(); btn.click(); });
+  document.body.append(sure);
+  const confirmSend = () => {
+    const left = qs.length - answered();
+    sure.querySelector("h3").textContent = live ? "Send these answers?" : "Copy these answers?";
+    sure.querySelector(".sb-n").textContent = left ? `${left} of ${qs.length} questions still have no answer.` : "";
+    sure.querySelector("pre").textContent = text();
+    sure.querySelector(".sb-go").innerHTML = verb() + (live ? plane : "") + kbd;
+    sure.showModal();
+  };
+  const owner = (el) => qs.findLastIndex((g) => g === el || g.contains(el) || g.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING);
+  addEventListener("keydown", (e) => {
+    if (e.key !== "Enter" || !(e.metaKey || e.ctrlKey)) return;
+    e.preventDefault();
+    if (sure.open) return sure.querySelector(".sb-go").click();
+    const el = document.activeElement, i = gbox.contains(el) ? qs.length : el && el !== document.body ? owner(el) : at;
+    if (i >= qs.length) return confirmSend();
+    if (i === qs.length - 1) return toGeneral();
+    const n = qs[i + 1];
+    go(n);
+    (n.querySelector(".opt.on .pick") || n.querySelector(".pick"))?.focus({ preventScroll: true });
+  });
   const copy = async (t) => {
     try { await navigator.clipboard.writeText(t); }
     catch { const a = document.createElement("textarea"); a.value = t; document.body.append(a); a.select(); document.execCommand("copy"); a.remove(); }
