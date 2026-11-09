@@ -61,6 +61,12 @@ import json, os, subprocess, sys, urllib.request
 p = subprocess.Popen([sys.executable, sys.argv[1], sys.argv[2], "--no-open", "--timeout", "20"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 url = p.stderr.readline().split(": ", 1)[1].strip().rsplit("/", 1)[0] + "/__prism"
 png = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
+import base64, shutil, tempfile
+if shutil.which("sips"):  # a TIFF pasted from a clipboard manager comes back as PNG for its thumbnail (macOS)
+    d = tempfile.mkdtemp(); open(f"{d}/a.png", "wb").write(base64.b64decode(png))
+    subprocess.run(["sips", "-s", "format", "tiff", f"{d}/a.png", "--out", f"{d}/a.tiff"], capture_output=True)
+    r = urllib.request.urlopen(urllib.request.Request(url + "/png", open(f"{d}/a.tiff", "rb").read()))
+    assert r.status == 200 and r.read(8) == b"\x89PNG\r\n\x1a\n"; shutil.rmtree(d)
 body = {"text": "1. Q: A. Note: look [image: paste-1.png] [image: ../up.png]", "images": [{"name": "paste-1.png", "data": png}, {"name": "../up.png", "data": png}]}
 urllib.request.urlopen(urllib.request.Request(url, json.dumps(body).encode(), {"Content-Type": "application/json"}))
 out = p.communicate(timeout=10)[0]

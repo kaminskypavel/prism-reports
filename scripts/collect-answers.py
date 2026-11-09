@@ -5,7 +5,8 @@ The page sees the server (GET /__prism) and turns Copy results into Send results
 and closes the tab. The answers print to stdout and the server exits, so an agent that runs this as a background
 command gets them the moment the user sends, with no copy and paste. Only the page's folder is served, on 127.0.0.1.
 Images pasted into the page's notes come as JSON; they are saved to a temp folder (they are input, not part of the page)
-and each "[image: paste-1.png]" in the answers becomes its full path, so the agent can open it.
+and each "[image: paste-1.png]" in the answers becomes its full path, so the agent can open it. A pasted TIFF or HEIC
+is converted to PNG on paste (POST /__prism/png, macOS sips), so its thumbnail shows in any browser.
 
 Usage: python3 collect-answers.py <page.html> [--timeout SECONDS] [--no-open]
 """
@@ -13,6 +14,8 @@ import argparse
 import base64
 import http.server
 import json
+import shutil
+import subprocess
 import pathlib
 import sys
 import tempfile
@@ -50,9 +53,20 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         super().do_GET()
 
     def do_POST(self):
-        if self.path != "/__prism":
+        if self.path not in ("/__prism", "/__prism/png"):
             return self.reply(404)
         body = self.rfile.read(int(self.headers.get("Content-Length", 0)))
+        if self.path == "/__prism/png":  # a pasted TIFF or HEIC that Chrome cannot draw comes back as PNG (macOS sips), for its thumbnail
+            with tempfile.TemporaryDirectory() as d:
+                src, dst = pathlib.Path(d, "in"), pathlib.Path(d, "out.png")
+                src.write_bytes(body)
+                ok = bool(shutil.which("sips")) and subprocess.run(["sips", "-s", "format", "png", str(src), "--out", str(dst)], capture_output=True).returncode == 0 and dst.is_file()
+                data = dst.read_bytes() if ok else b""
+            self.send_response(200 if ok else 415)
+            self.send_header("Content-Type", "image/png")
+            self.send_header("Content-Length", str(len(data)))
+            self.end_headers()
+            return self.wfile.write(data)
         if not self.headers.get("Content-Type", "").startswith("application/json"):
             answers.append(body.decode("utf-8"))  # older pages post plain text
         else:

@@ -192,7 +192,7 @@ nav.toc .acts .done{background:var(--good);border-color:var(--good);color:var(--
 .qnote.drop{border-style:solid;border-color:var(--ink);background-color:var(--surface)}
 .pics{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}.qnote[hidden]+.pics{display:none}
 .pic{position:relative;width:72px;height:72px;border-radius:8px;overflow:hidden;border:1px solid var(--line);background:var(--soft)}
-.pic img{width:100%;height:100%;object-fit:cover;display:block}
+.pic img{width:100%;height:100%;object-fit:cover;display:block}.pic.raw{display:grid;place-items:center;font-size:12px;color:var(--mute)}
 .pic button{position:absolute;top:3px;right:3px;width:20px;height:20px;padding:0;border:0;border-radius:50%;background:rgba(20,20,20,.7);color:#fff;font:600 13px/20px var(--font);cursor:pointer}
 .pics::after{content:"Copy results leaves images out; Send results takes them.";flex-basis:100%;font-size:12.5px;color:var(--mute)}body.live .pics::after{display:none}
 .row .pics{grid-column:2;margin:0}@media (max-width:640px){.row .pics{grid-column:1}}
@@ -568,16 +568,30 @@ document.addEventListener("click", (e) => {
   const grow = (t) => { t.style.height = "auto"; t.style.height = `${t.scrollHeight + 2}px`; };
   const pics = new Map(); // note box -> its pasted images [{ name, file, url }]; not kept across reloads (too big for localStorage)
   let picN = 0;
-  const addPics = (t, files) => {
-    const imgs = [...files].filter((f) => f.type.startsWith("image/"));
+  const web = /^image\/(png|jpeg|gif|webp|avif|bmp)$/; // what every browser draws
+  const toPng = async (f) => { // a TIFF or HEIC (clipboard managers, Preview) is redrawn as PNG where the browser can decode it (Safari)
+    if (web.test(f.type)) return f;
+    try {
+      const bmp = await createImageBitmap(f), c = Object.assign(document.createElement("canvas"), { width: bmp.width, height: bmp.height });
+      c.getContext("2d").drawImage(bmp, 0, 0);
+      return await new Promise((ok) => c.toBlob((b) => ok(b ? new File([b], "paste.png", { type: "image/png" }) : f), "image/png"));
+    } catch { // Chrome cannot read TIFF: the answer server converts it; opened as a file, it shows as a format tile
+      const r = live && (await fetch("/__prism/png", { method: "POST", body: f }).catch(() => null));
+      return r?.ok ? new File([await r.blob()], "paste.png", { type: "image/png" }) : f;
+    }
+  };
+  const addPics = async (t, files) => {
+    const imgs = await Promise.all([...files].filter((f) => f.type.startsWith("image/")).map(toPng));
     if (!imgs.length) return;
     if (!pics.has(t)) { pics.set(t, []); t.after(Object.assign(document.createElement("div"), { className: "pics" })); }
     const list = pics.get(t), strip = t.nextElementSibling;
     for (const file of imgs) {
-      const p = { name: `paste-${++picN}.${(file.type.split("/")[1] || "png").replace("jpeg", "jpg").replace(/\+.*/, "")}`, file, url: URL.createObjectURL(file) };
+      const ext = (file.type.split("/")[1] || "png").replace("jpeg", "jpg").replace(/\+.*/, "");
+      const p = { name: `paste-${++picN}.${ext}`, file, url: URL.createObjectURL(file) };
       const el = Object.assign(document.createElement("span"), { className: "pic" });
       el.innerHTML = '<img alt=""><button type="button" aria-label="Remove image">\u00d7</button>';
-      Object.assign(el.firstChild, { src: p.url, alt: p.name });
+      if (web.test(file.type)) Object.assign(el.firstChild, { src: p.url, alt: p.name });
+      else { el.classList.add("raw"); el.firstChild.replaceWith(Object.assign(document.createElement("b"), { textContent: ext.toUpperCase() })); } // no preview here, still sent
       el.lastChild.addEventListener("click", () => { list.splice(list.indexOf(p), 1); el.remove(); URL.revokeObjectURL(p.url); label(); });
       list.push(p);
       strip.append(el);
