@@ -4,14 +4,20 @@
 The page sees the server (GET /__prism) and turns Copy results into Send results: one click posts the answers here
 and closes the tab. The answers print to stdout and the server exits, so an agent that runs this as a background
 command gets them the moment the user sends, with no copy and paste. Only the page's folder is served, on 127.0.0.1.
+Images pasted into the page's notes come as JSON; they are saved to a temp folder (they are input, not part of the page)
+and each "[image: paste-1.png]" in the answers becomes its full path, so the agent can open it.
 
 Usage: python3 collect-answers.py <page.html> [--timeout SECONDS] [--no-open]
 """
 import argparse
+import base64
 import http.server
+import json
 import pathlib
 import sys
+import tempfile
 import threading
+import time
 import urllib.parse
 import webbrowser
 
@@ -46,7 +52,20 @@ class Handler(http.server.SimpleHTTPRequestHandler):
     def do_POST(self):
         if self.path != "/__prism":
             return self.reply(404)
-        answers.append(self.rfile.read(int(self.headers.get("Content-Length", 0))).decode("utf-8"))
+        body = self.rfile.read(int(self.headers.get("Content-Length", 0)))
+        if not self.headers.get("Content-Type", "").startswith("application/json"):
+            answers.append(body.decode("utf-8"))  # older pages post plain text
+        else:
+            d = json.loads(body)
+            text, images = d["text"], d.get("images") or []
+            if images:
+                out = pathlib.Path(tempfile.gettempdir()) / "prism-notes" / f"{page.stem}-{time.strftime('%Y%m%d-%H%M%S')}"
+                out.mkdir(parents=True, exist_ok=True)
+                for im in images:
+                    f = out / pathlib.Path(im["name"]).name  # a bare file name, never a path from the page
+                    f.write_bytes(base64.b64decode(im["data"]))
+                    text = text.replace(f"[image: {im['name']}]", f"[image: {f}]")
+            answers.append(text)
         self.reply(204)
         threading.Thread(target=server.shutdown).start()
 

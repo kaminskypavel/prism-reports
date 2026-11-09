@@ -54,6 +54,22 @@ tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT
 mkdir -p "$tmp/hooks"; cp "$root/hooks/prism-activate.sh" "$tmp/hooks/"
 [ -z "$(CLAUDE_PLUGIN_ROOT="$tmp" sh "$tmp/hooks/prism-activate.sh" 2>&1)" ] || fail "missing ruleset should print nothing"
 
+# Send results with two pasted images: the server saves them to a temp folder and prints their paths
+echo "<p>x</p>" > "$tmp/p.html"
+python3 - "$root/scripts/collect-answers.py" "$tmp/p.html" <<'PY' || fail "pasted images are not saved"
+import json, os, subprocess, sys, urllib.request
+p = subprocess.Popen([sys.executable, sys.argv[1], sys.argv[2], "--no-open", "--timeout", "20"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+url = p.stderr.readline().split(": ", 1)[1].strip().rsplit("/", 1)[0] + "/__prism"
+png = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
+body = {"text": "1. Q: A. Note: look [image: paste-1.png] [image: ../up.png]", "images": [{"name": "paste-1.png", "data": png}, {"name": "../up.png", "data": png}]}
+urllib.request.urlopen(urllib.request.Request(url, json.dumps(body).encode(), {"Content-Type": "application/json"}))
+out = p.communicate(timeout=10)[0]
+paths = [x.split("]")[0] for x in out.split("[image: ")[1:]]
+assert len(paths) == 2 and all(os.path.isfile(f) for f in paths), out
+assert len({os.path.dirname(f) for f in paths}) == 1 and "prism-notes" in paths[0], out  # ../ stays inside the temp folder
+for f in paths: os.remove(f)
+PY
+
 # no em dashes in anything the agent reads
 dash=$(printf "\342\200\224")
 ! grep -rl "$dash" "$root/hooks" "$root/skills" "$root/templates" "$root/AGENTS.md" >/dev/null 2>&1 || fail "em dash found"

@@ -188,6 +188,14 @@ nav.toc .acts .done{background:var(--good);border-color:var(--good);color:var(--
 .qnote::placeholder{color:var(--mute)}.qnote:hover{border-color:var(--faint)}
 .qnote:not(:placeholder-shown){border-style:solid;border-color:var(--line);background-color:var(--surface)}
 .qnote:focus{outline:none;border-style:solid;border-color:var(--ink);background-color:var(--surface);box-shadow:0 0 0 3px rgba(20,20,20,.08)}
+/* Pasted images: paste (Cmd+V) or drop images on any note; each shows as a thumbnail under it with a remove button. Send results carries them. */
+.qnote.drop{border-style:solid;border-color:var(--ink);background-color:var(--surface)}
+.pics{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}.qnote[hidden]+.pics{display:none}
+.pic{position:relative;width:72px;height:72px;border-radius:8px;overflow:hidden;border:1px solid var(--line);background:var(--soft)}
+.pic img{width:100%;height:100%;object-fit:cover;display:block}
+.pic button{position:absolute;top:3px;right:3px;width:20px;height:20px;padding:0;border:0;border-radius:50%;background:rgba(20,20,20,.7);color:#fff;font:600 13px/20px var(--font);cursor:pointer}
+.pics::after{content:"Copy results leaves images out; Send results takes them.";flex-basis:100%;font-size:12.5px;color:var(--mute)}body.live .pics::after{display:none}
+.row .pics{grid-column:2;margin:0}@media (max-width:640px){.row .pics{grid-column:1}}
 .gnote{margin:32px 0 0;padding:22px 0 0;border-top:1px solid var(--line)}
 .gnote label{display:block;font-size:17px;font-weight:700;letter-spacing:-.01em}
 .gnote p{margin:2px 0 0;font-size:14px;color:var(--mute)}.gnote .qnote{min-height:88px}
@@ -518,6 +526,7 @@ document.addEventListener("click", (e) => {
     qs.forEach((g, i) => nexts[i].classList.toggle("ready", done(g)));
     fin.classList.toggle("ready", all);
     copier.hidden = !live;
+    document.body.classList.toggle("live", live);
     for (const [g, bar] of bars) {
       const rs = rowsOf(g), n = rs.length ? rs.filter((r) => r.querySelector(".opt.on")).length : picks(g).length;
       const all = rs.length || choices(g).length;
@@ -527,7 +536,7 @@ document.addEventListener("click", (e) => {
     }
     for (const [r, t] of rnotes) { // a row's note shows once the row has a pick, so any pick can carry a note; Redo asks what to change
       const o = r.querySelector(".opt.on");
-      if (o || t.value.trim() || document.activeElement === t) { if (t.hidden) { t.hidden = false; grow(t); } } else t.hidden = true;
+      if (o || t.value.trim() || pics.get(t)?.length || document.activeElement === t) { if (t.hidden) { t.hidden = false; grow(t); } } else t.hidden = true;
       r.querySelector(".row-add").hidden = !t.hidden;
       t.placeholder = o?.classList.contains("redo") ? `What should change in ${r.dataset.row}?` : `Add a note on ${r.dataset.row} (optional)`;
     }
@@ -535,7 +544,7 @@ document.addEventListener("click", (e) => {
       li.classList.toggle("done", done(qs[i]));
       li.querySelector(".wa").textContent = named(qs[i]);
     });
-    gstep.classList.toggle("done", !!general.value.trim());
+    gstep.classList.toggle("done", !!said(general));
     gstep.querySelector(".wa").textContent = general.value.trim();
     wiz.querySelector(".wn").textContent = `${answered()}/${qs.length}`;
     track(); // picking shows the wizard
@@ -557,17 +566,40 @@ document.addEventListener("click", (e) => {
   const choices = (g) => [...g.querySelectorAll(".opt[data-key]")].filter((o) => o.querySelector(".pick"));
   const fill = (g) => rowsOf(g).some((r) => !r.querySelector(".opt.on") && r.querySelector(".opt.rec")); // rows Pick all recommended can fill
   const grow = (t) => { t.style.height = "auto"; t.style.height = `${t.scrollHeight + 2}px`; };
+  const pics = new Map(); // note box -> its pasted images [{ name, file, url }]; not kept across reloads (too big for localStorage)
+  let picN = 0;
+  const addPics = (t, files) => {
+    const imgs = [...files].filter((f) => f.type.startsWith("image/"));
+    if (!imgs.length) return;
+    if (!pics.has(t)) { pics.set(t, []); t.after(Object.assign(document.createElement("div"), { className: "pics" })); }
+    const list = pics.get(t), strip = t.nextElementSibling;
+    for (const file of imgs) {
+      const p = { name: `paste-${++picN}.${(file.type.split("/")[1] || "png").replace("jpeg", "jpg").replace(/\+.*/, "")}`, file, url: URL.createObjectURL(file) };
+      const el = Object.assign(document.createElement("span"), { className: "pic" });
+      el.innerHTML = '<img alt=""><button type="button" aria-label="Remove image">\u00d7</button>';
+      Object.assign(el.firstChild, { src: p.url, alt: p.name });
+      el.lastChild.addEventListener("click", () => { list.splice(list.indexOf(p), 1); el.remove(); URL.revokeObjectURL(p.url); label(); });
+      list.push(p);
+      strip.append(el);
+    }
+    label();
+  };
+  const said = (t) => [flat(t.value.trim()), ...(pics.get(t) || []).map((p) => (live ? `[image: ${p.name}]` : "[image left out: only Send results carries images]"))].filter(Boolean).join(" ");
   const noteBox = (value, name, placeholder) => {
     const t = Object.assign(document.createElement("textarea"), { className: "qnote", rows: 1, placeholder, value: value || "" });
     t.setAttribute("aria-label", name);
     t.addEventListener("input", () => { grow(t); save(); });
+    t.addEventListener("paste", (e) => addPics(t, e.clipboardData.files)); // screenshots, copied images; text pastes as usual
+    t.addEventListener("dragover", (e) => { if (e.dataTransfer.types.includes("Files")) { e.preventDefault(); t.classList.add("drop"); } });
+    t.addEventListener("dragleave", () => t.classList.remove("drop"));
+    t.addEventListener("drop", (e) => { t.classList.remove("drop"); if (e.dataTransfer.files.length) { e.preventDefault(); addPics(t, e.dataTransfer.files); } });
     requestAnimationFrame(() => grow(t));
     return t;
   };
   for (const c of document.querySelectorAll(".opt .chip")) if (/^recommended$/i.test(c.textContent.trim())) { c.classList.add("rec"); c.closest(".opt").classList.add("rec"); }
   for (const g of qs) {
     const s = saved[g.dataset.q] || {};
-    const box = noteBox(s.note, `Note on: ${g.dataset.q}`, "Add a note (optional)");
+    const box = noteBox(s.note, `Note on: ${g.dataset.q}`, "Add a note or paste images (optional)");
     notes.set(g, box);
     g.after(box);
     for (const r of rowsOf(g)) { // row picks: name and Add note on the left, the tiles plus a Redo tile, the row's note under them
@@ -628,8 +660,8 @@ document.addEventListener("click", (e) => {
   const block = (g) => { const s = g.closest("section"); return s && s.querySelectorAll(".opts[data-q]").length === 1 ? s : g; }; // what focus dims
   const tname = (o) => (o.querySelector(".opt-h b")?.textContent || o.dataset.name || o.dataset.key).trim();
   const row = (r, full) => { // "Geek: Try 1", with its note when full
-    const o = r.querySelector(".opt.on"), n = rnotes.get(r).value.trim();
-    return `${r.dataset.row}: ${o ? tname(o) : "no pick"}${full && n ? ` (note: ${flat(n)})` : ""}`;
+    const o = r.querySelector(".opt.on"), n = said(rnotes.get(r));
+    return `${r.dataset.row}: ${o ? tname(o) : "no pick"}${full && n ? ` (note: ${n})` : ""}`;
   };
   const answer = (g) => (rowsOf(g).length ? (picks(g).length ? [rowsOf(g).map((r) => row(r, true)).join("; ")] : [])
     : picks(g).map((o) => (o.dataset.name ? `${o.dataset.key} (${o.dataset.name})` : o.dataset.key)));
@@ -638,7 +670,7 @@ document.addEventListener("click", (e) => {
   const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3v10M3.5 8.5 8 13l4.5-4.5"/></svg>';
   const gbox = Object.assign(document.createElement("div"), { className: "gnote" });
   gbox.innerHTML = '<label for="gnote">Anything else?</label><p>A note on the whole page, sent with your answers.</p>';
-  const general = noteBox(saved.__page?.note, "Anything else? A note on the whole page", "Add a general note (optional)");
+  const general = noteBox(saved.__page?.note, "Anything else? A note on the whole page", "Add a general note or paste images (optional)");
   general.id = "gnote";
   const toGeneral = () => { gbox.scrollIntoView({ behavior: smooth(), block: "center" }); general.focus({ preventScroll: true }); };
   const nexts = qs.map((g, i) => {
@@ -686,8 +718,8 @@ document.addEventListener("click", (e) => {
   addEventListener("scroll", track, { passive: true });
   const text = () => [
     `Answers from "${title}" (${decodeURIComponent(location.pathname)})`,
-    ...qs.map((g, i) => `${i + 1}. ${g.dataset.q}: ${answer(g).join(", ") || "no answer"}${note(g) ? `. Note: ${flat(note(g))}` : ""}`),
-    ...(general.value.trim() ? [`General note: ${flat(general.value.trim())}`] : []),
+    ...qs.map((g, i) => `${i + 1}. ${g.dataset.q}: ${answer(g).join(", ") || "no answer"}${said(notes.get(g)) ? `. Note: ${said(notes.get(g))}` : ""}`),
+    ...(said(general) ? [`General note: ${said(general)}`] : []),
   ].join("\n");
   const copy = async (t) => {
     try { await navigator.clipboard.writeText(t); }
@@ -696,7 +728,10 @@ document.addEventListener("click", (e) => {
   btn.addEventListener("click", async () => {
     const t = text();
     if (live) {
-      live = await fetch("/__prism", { method: "POST", body: t }).then((r) => r.ok, () => false);
+      const b64 = (f) => new Promise((ok) => { const r = new FileReader(); r.onload = () => ok(r.result.split(",")[1]); r.readAsDataURL(f); });
+      const images = await Promise.all([...pics.values()].flat().map(async (p) => ({ name: p.name, data: await b64(p.file) })));
+      const body = JSON.stringify({ text: t, images }); // the server saves images to a temp folder and puts their paths in the text
+      live = await fetch("/__prism", { method: "POST", headers: { "Content-Type": "application/json" }, body }).then((r) => r.ok, () => false);
       if (live) {
         live = false; // the server exits after one answer; later clicks copy
         btn.textContent = "Sent";
