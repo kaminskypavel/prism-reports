@@ -485,6 +485,12 @@ document.addEventListener("click", (e) => {
       bar.lastChild.textContent = rs.length ? (fill(g) ? (n ? "Recommended for the rest" : "Pick all recommended") : "Clear all") : n === all ? "Deselect all" : "Select all";
       bar.lastChild.hidden = rs.length > 0 && !n && !fill(g);
     }
+    for (const [r, t] of rnotes) { // a row's note shows once the row has a pick, so any pick can carry a note; Redo asks what to change
+      const o = r.querySelector(".opt.on");
+      if (o || t.value.trim() || document.activeElement === t) { if (t.hidden) { t.hidden = false; grow(t); } } else t.hidden = true;
+      r.querySelector(".row-add").hidden = !t.hidden;
+      t.placeholder = o?.classList.contains("redo") ? `What should change in ${r.dataset.row}?` : `Add a note on ${r.dataset.row} (optional)`;
+    }
     steps.forEach((li, i) => {
       li.classList.toggle("done", done(qs[i]));
       li.querySelector(".wa").textContent = named(qs[i]);
