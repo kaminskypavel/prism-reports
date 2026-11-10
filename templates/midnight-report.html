@@ -1,6 +1,7 @@
 <!doctype html>
 <!-- Midnight report template (dark, opt-in only; same components as Daylight). Rules: skills/prism-reports/SKILL.md in the prism-reports plugin
      Copy this file, keep the style block and both script blocks, replace the demo content, delete components you don't use.
+     One chat, one page: a new topic is a new tab (nav.themes + div.theme, see the CSS), newest first.
      Order: answer -> One thing -> stats -> nav -> evidence sections -> appendix. -->
 <html lang="en">
 <head>
@@ -66,6 +67,14 @@ nav.toc{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;margin:20px -3
 nav.toc::-webkit-scrollbar{display:none}
 nav.toc a{flex:none;text-decoration:none;font-size:13.5px;font-weight:600;color:var(--mute);padding:6px 12px;border-radius:999px}
 nav.toc a:hover{color:var(--ink);background:var(--surface)}nav.toc a.on{color:var(--ink);background:var(--surface);box-shadow:inset 0 0 0 1px var(--line)}
+/* Chat themes: one page per chat. Each theme (a topic the chat moved to) is a tab, newest first; nav.themes sits above them and
+   every div.theme[id] holds its own header, One thing, nav.toc and rounds. page.html#<theme id> opens that tab (the index links each). */
+nav.themes{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;width:max-content;max-width:100%;margin:0 0 22px;padding:4px;border-radius:999px;background:var(--track)}
+nav.themes::-webkit-scrollbar{display:none}
+nav.themes a{flex:none;text-decoration:none;font-size:13.5px;font-weight:600;color:var(--mute);padding:6px 14px;border-radius:999px}
+nav.themes a:hover{color:var(--ink)}nav.themes a.on{color:var(--ink);background:var(--surface);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+nav.themes a:first-child::after{content:"latest";margin-left:6px;font-size:11px;font-weight:700;color:var(--accent)}
+.theme{scroll-margin-top:70px}
 /* sections + panels */
 section{margin-top:44px;scroll-margin-top:64px}
 .dh{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
@@ -355,6 +364,37 @@ document.addEventListener("click", (e) => {
   }, { rootMargin: "-35% 0px -60% 0px" });
   for (const s of document.querySelectorAll("section[id]")) io.observe(s);
 })();
+/* Chat themes (see nav.themes in the CSS): show the tab that holds the URL's #id, else the first (newest). Tab links and any in-page
+   jump into another tab switch to it, so page.html#<theme id> or #<section id> opens straight on that tab. */
+(() => {
+  const themes = [...document.querySelectorAll(".theme[id]")];
+  if (!themes.length) return;
+  const show = () => {
+    const t = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+    const th = t?.closest(".theme") || themes[0];
+    const moved = th.hidden;
+    for (const x of themes) x.hidden = x !== th;
+    for (const a of document.querySelectorAll("nav.themes a")) a.classList.toggle("on", a.hash === `#${th.id}`);
+    if (moved && t) t.scrollIntoView();
+  };
+  show();
+  addEventListener("hashchange", show);
+})();
+/* Served by scripts/collect-answers.py, the page reloads itself when its file changes or the server restarts, so a whole chat
+   stays in one tab: each new round shows up in place, newest tab first. */
+if (location.protocol.startsWith("http")) (() => {
+  let seen;
+  const tick = () => fetch("/__prism/stamp", { cache: "no-store" }).then((r) => (r.ok ? r.text() : null), () => null).then((s) => {
+    if (s && seen && s !== seen) {
+      history.scrollRestoration = "manual";
+      history.replaceState(null, "", location.pathname); // the new round is on the first tab, at the top
+      return location.reload();
+    }
+    seen = s || seen;
+    setTimeout(tick, 1000);
+  });
+  tick();
+})();
 </script>
 <script>
 /* Facelift motion (Motion from the pinned CDN). Nothing is hidden waiting for it; it only moves what is already on screen.
@@ -365,8 +405,7 @@ document.addEventListener("click", (e) => {
   if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   import("https://cdn.jsdelivr.net/npm/motion@14.9.0/+esm").then(({ animate }) => {
     const ease = [0.16, 1, 0.3, 1], spring = { type: "spring", bounce: 0.2, duration: 0.45 };
-    const nav = document.querySelector("nav.toc");
-    if (nav) {
+    for (const nav of document.querySelectorAll("nav.toc")) { // one per chat theme
       const pill = Object.assign(document.createElement("i"), { className: "pill" });
       nav.prepend(pill); nav.classList.add("slide");
       let first = true;

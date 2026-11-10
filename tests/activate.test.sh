@@ -76,6 +76,25 @@ assert len({os.path.dirname(f) for f in paths}) == 1 and "prism-notes" in paths[
 for f in paths: os.remove(f)
 PY
 
+# one chat, one page: tabs per topic, a tab that reloads itself, Send keeps the tab
+grep -q "One chat, one page" "$root/hooks/always.md" || fail "one page per chat rule missing"
+for t in daylight-report midnight-report decision-page; do grep -q "nav.themes" "$root/templates/$t.html" && grep -q "/__prism/stamp" "$root/templates/$t.html" || fail "$t has no chat tabs or live reload"; done
+grep -q "next round loads here" "$root/templates/decision-page.html" || fail "Send results still closes the tab"
+grep -q "tabs:" "$root/scripts/check-report.mjs" || fail "check-report does not check chat tabs"
+grep -q 'class="tabs"' "$root/scripts/reports-index.py" || fail "index does not link chat tabs"
+echo "<p>x</p>" > "$tmp/c.html"
+python3 - "$root/scripts/collect-answers.py" "$tmp/c.html" <<'PY' || fail "same port per page or handover broken"
+import os, subprocess, sys, time, urllib.request
+run = lambda: subprocess.Popen([sys.executable, sys.argv[1], sys.argv[2], "--no-open", "--timeout", "20"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+a = run(); ua = a.stderr.readline().split(": ", 1)[1].strip()
+stamp = lambda: urllib.request.urlopen(ua.rsplit("/", 1)[0] + "/__prism/stamp").read()
+s1 = stamp(); os.utime(sys.argv[2], (time.time() + 5,) * 2); assert stamp() != s1, "file change does not change the stamp"
+b = run(); ub = b.stderr.readline().split(": ", 1)[1].strip()
+assert ua == ub, (ua, ub)
+assert "Handed over" in a.communicate(timeout=10)[1]
+b.kill()
+PY
+
 # no em dashes in anything the agent reads
 dash=$(printf "\342\200\224")
 ! grep -rl "$dash" "$root/hooks" "$root/skills" "$root/templates" "$root/AGENTS.md" >/dev/null 2>&1 || fail "em dash found"

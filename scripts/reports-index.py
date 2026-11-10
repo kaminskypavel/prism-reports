@@ -193,7 +193,9 @@ def main() -> None:
             f.write_text(src)
         t = re.search(r"<title>(.*?)</title>", src, re.S | re.I) or re.search(r"<h1[^>]*>(.*?)</h1>", src, re.S | re.I)
         title = html.unescape(re.sub(r"<[^>]+>|\s+", " ", t.group(1))).strip() if t else f.stem
-        rows.append({"href": rel, "title": title, "date": d, "topic": meta(src, "report-topic") or "Unsorted"})
+        nav = re.search(r'<nav class="themes"[^>]*>(.*?)</nav>', src, re.S)  # a chat page: link each tab (page.html#<theme id>)
+        tabs = [(h, html.unescape(re.sub(r"<[^>]+>", "", t)).strip()) for h, t in re.findall(r'<a[^>]*href="(#[^"]+)"[^>]*>(.*?)</a>', nav.group(1), re.S)] if nav else []
+        rows.append({"href": rel, "title": title, "date": d, "topic": meta(src, "report-topic") or "Unsorted", "tabs": tabs})
 
     rows.sort(key=lambda r: (r["date"], r["title"]))
     names = sorted({r["topic"] for r in rows}, key=lambda t: (-sum(r["topic"] == t for r in rows), t))
@@ -202,8 +204,14 @@ def main() -> None:
     pills = '<button class="on" data-t="">All <b>{}</b></button>'.format(len(rows)) + "".join(
         f'<button data-t="{E(t)}"><i style="background:{color[t]}"></i>{E(t)} <b>{sum(r["topic"] == t for r in rows)}</b></button>' for t in names
     )
+    def tabs_html(r: dict) -> str:  # a chat page's tabs, each opening on its own tab
+        links = "".join(f'<a class="tab" href="{E(r["href"] + h)}" target="_blank" rel="noopener">{E(t)}</a>' for h, t in r["tabs"])
+        return f'<span class="tabs">{links}</span>' if links else ""
+
     trs = "".join(
-        f'<tr data-t="{E(r["topic"])}"><td class="d">{E(r["date"])}</td><td dir="auto"><a href="{E(r["href"])}" target="_blank" rel="noopener">{E(r["title"])}</a></td>'
+        f'<tr data-t="{E(r["topic"])}"><td class="d">{E(r["date"])}</td><td dir="auto"><a href="{E(r["href"])}" target="_blank" rel="noopener">{E(r["title"])}</a>'
+        + tabs_html(r)
+        + '</td>'
         f'<td><span class="tp" style="background:{color[r["topic"]]}">{E(r["topic"])}</span></td></tr>'
         for r in rows
     )
@@ -223,6 +231,7 @@ table{{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;ov
 th,td{{text-align:left;padding:11px 14px;border-bottom:1px solid #cfcfc9;vertical-align:middle}}tr:last-child td{{border-bottom:0}}
 th{{font-size:12px;color:#55554f;text-transform:uppercase;letter-spacing:.05em}}td.d{{color:#55554f;white-space:nowrap;width:150px}}
 td a{{color:#141414;font-weight:600;text-decoration:none}}td a:hover{{color:#2440e8}}tr:hover td{{background:#f7f7f4}}
+.tabs{{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:3px}}td a.tab{{font-weight:500;font-size:13px;color:#55554f}}td a.tab:hover{{color:#2440e8}}
 .tp{{display:inline-block;color:#fff;font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;white-space:nowrap}}
 </style></head><body><div class="wrap">{up}
 <h1>{E(index_title)} <span class="badge">{len(rows)}</span></h1>
