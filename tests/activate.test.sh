@@ -82,6 +82,10 @@ grep -q "A new topic is a new page" "$root/hooks/always.md" || fail "new topic r
 grep -rqi "theme" "$root/hooks/always.md" "$root/skills/prism-reports/references/decisions-and-iterations.md" && fail "topic tabs (themes) are back"
 for t in daylight-report midnight-report decision-page; do grep -q "nav.rounds" "$root/templates/$t.html" && grep -q "/__prism/stamp" "$root/templates/$t.html" || fail "$t has no round tabs or live reload"; done
 grep -q 'class="round" id="round-1"' "$root/templates/decision-page.html" || fail "decision page demo does not show round tabs"
+for t in daylight-report midnight-report decision-page; do grep -q ".round nav.toc{display:none}" "$root/templates/$t.html" || fail "$t round tabs are not the one bar"; done
+grep -q 'document.querySelector("nav.rounds")' "$root/templates/decision-page.html" || fail "Send results does not move into the round tabs bar"
+grep -q 'const round = ' "$root/templates/decision-page.html" || fail "saved answers are not per round (old notes carry over)"
+grep -q "one question needs no step list" "$root/scripts/check-report.mjs" || fail "check-report does not flag a step that repeats the lone question"
 grep -q "next round loads here" "$root/templates/decision-page.html" || fail "Send results still closes the tab"
 grep -q "tabs:" "$root/scripts/check-report.mjs" || fail "check-report does not check chat tabs"
 grep -q 'class="tabs"' "$root/scripts/reports-index.py" || fail "index does not link chat tabs"

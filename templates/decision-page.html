@@ -68,8 +68,11 @@ nav.toc a{flex:none;text-decoration:none;font-size:13.5px;font-weight:600;color:
 nav.toc a:hover{color:var(--ink);background:var(--surface)}nav.toc a.on{color:var(--ink);background:var(--surface);box-shadow:inset 0 0 0 1px var(--line)}
 /* Rounds: one topic, one page (a new topic is a new page, linked both ways). From round 2 on each round is a tab, newest first:
    nav.rounds right after the back link, then one div.round[id="round-N"] per round, each a whole page (header, One thing, nav.toc,
-   sections) with its ids prefixed by the round id. page.html#round-2 opens that round (the index links each). */
-nav.rounds{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 0 26px;border-bottom:2px solid var(--ink)}
+   sections) with its ids prefixed by the round id. page.html#round-2 opens that round (the index links each). The tabs are the sticky bar. */
+nav.rounds{display:flex;align-items:flex-end;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 0 26px;padding-top:10px;border-bottom:2px solid var(--ink);position:sticky;top:0;z-index:10;background:var(--bg)}
+/* one bar: on a page with rounds the tabs are the sticky top bar; section links hide and Send results sits at its right (the script moves it) */
+.round nav.toc{display:none}nav.rounds .acts{align-self:center;margin-bottom:6px}
+@media (max-width:640px){nav.rounds a{padding:8px 12px;font-size:14px}nav.rounds a:first-child::after{display:none}nav.rounds .acts .copy-one{display:none}}
 nav.rounds::-webkit-scrollbar{display:none}
 nav.rounds a{flex:none;display:flex;align-items:center;gap:8px;text-decoration:none;font-size:15px;font-weight:700;color:var(--mute);padding:10px 18px;background:var(--surface);border:1.5px solid var(--line);border-bottom:0;border-radius:10px 10px 0 0}
 nav.rounds a:hover{color:var(--ink);border-color:var(--ink)}nav.rounds a.on{color:var(--bg);background:var(--ink);border-color:var(--ink)}
@@ -182,13 +185,13 @@ dialog.zoom-box img{display:block;max-width:96vw;max-height:94vh;width:auto;heig
 .away:hover{opacity:.85;transition-delay:.25s} /* a resting mouse should not undo focus at once */
 /* answers: Copy results (Send results when served, with a Copy button before it) pinned at the right of the sticky nav, and after
    a copy a Close tab button right next to it (the script wraps them in .acts; Close tab springs in with Motion). A note box under each question. */
-nav.toc .acts{flex:none;margin-left:auto;position:sticky;right:0;display:flex;gap:6px;background:var(--bg);box-shadow:-14px 0 10px var(--bg),32px 0 0 var(--bg)}
-nav.toc .acts button{flex:none;font:inherit;font-size:13.5px;font-weight:600;padding:6px 14px;border-radius:999px;border:1px solid var(--ink);background:var(--ink);color:var(--surface);cursor:pointer;white-space:nowrap}
-nav.toc .acts .close-tab,nav.toc .acts .copy-one{background:var(--surface);color:var(--ink)}nav.toc .acts [hidden]{display:none}
+:is(nav.toc,nav.rounds) .acts{flex:none;margin-left:auto;position:sticky;right:0;display:flex;gap:6px;background:var(--bg);box-shadow:-14px 0 10px var(--bg),32px 0 0 var(--bg)}
+:is(nav.toc,nav.rounds) .acts button{flex:none;font:inherit;font-size:13.5px;font-weight:600;padding:6px 14px;border-radius:999px;border:1px solid var(--ink);background:var(--ink);color:var(--surface);cursor:pointer;white-space:nowrap}
+:is(nav.toc,nav.rounds) .acts .close-tab,:is(nav.toc,nav.rounds) .acts .copy-one{background:var(--surface);color:var(--ink)}:is(nav.toc,nav.rounds) .acts [hidden]{display:none}
 /* Results button (Send or Copy): green, the page's one go action. Tinted until every question is answered, then solid. */
-nav.toc .acts .copy-all,.next-q.send{display:inline-flex;align-items:center;gap:8px;background:var(--good-tint);color:var(--good);border-color:var(--good)}
-nav.toc .acts .copy-all.ready,.next-q.send.ready,.next-q.send.ready:hover{background:var(--good);color:#fff}.next-q.send:hover{background:#d5ebe7}
-nav.toc .acts .done{background:var(--good);border-color:var(--good);color:var(--surface)}
+:is(nav.toc,nav.rounds) .acts .copy-all,.next-q.send{display:inline-flex;align-items:center;gap:8px;background:var(--good-tint);color:var(--good);border-color:var(--good)}
+:is(nav.toc,nav.rounds) .acts .copy-all.ready,.next-q.send.ready,.next-q.send.ready:hover{background:var(--good);color:#fff}.next-q.send:hover{background:#d5ebe7}
+:is(nav.toc,nav.rounds) .acts .done{background:var(--good);border-color:var(--good);color:var(--surface)}
 /* Next question: under each question's note box; jumps to the next question (the last one to the general note, whose button sends). Fills once answered. */
 .next-q{display:flex;align-items:center;gap:8px;width:max-content;margin:10px 0 0 auto;font:inherit;font-size:14px;font-weight:600;padding:8px 16px;border-radius:999px;border:1.5px solid var(--ink);background:var(--surface);color:var(--ink);cursor:pointer}
 .next-q:hover{background:var(--soft)}.next-q kbd{font:600 11px/1 var(--font);opacity:.6;margin-left:2px}@media (hover:none){.next-q kbd{display:none}}
@@ -281,7 +284,7 @@ nav.toc .pill{position:absolute;top:10px;left:0;height:31px;border-radius:999px;
   <header>
     <h1>Which option should we ship for the thing being decided?</h1>
     <p class="lede">Recommendation: B, in one sentence that names why.</p>
-    <p class="sub">Round 2 of 2 · YYYY-MM-DD HH:MM · what is being decided and what happens after the pick</p>
+    <p class="sub">Round 2 of 2 · YYYY-MM-DD HH:MM</p>
   </header>
 
   <div class="cta">
@@ -339,7 +342,7 @@ nav.toc .pill{position:absolute;top:10px;left:0;height:31px;border-radius:999px;
   <header>
     <h1>Which option should we ship for the thing being decided?</h1>
     <p class="lede">Decided: A and B go on to round 2.</p>
-    <p class="sub">Round 1 of 2 · YYYY-MM-DD HH:MM · kept for the record, picks closed</p>
+    <p class="sub">Round 1 of 2 · YYYY-MM-DD HH:MM</p>
   </header>
   <div class="cta"><p class="one-h">One thing</p><p class="one"><mark>Decided: keep A and B, drop the rest.</mark></p></div>
   <section id="round-1-pick">
@@ -560,7 +563,8 @@ if (location.protocol.startsWith("http")) (() => {
   const qs = [...document.querySelectorAll(".opts[data-q]")];
   const btn = document.querySelector(".copy-all");
   if (!qs.length || !btn) return;
-  const store = `answers:${location.pathname}`;
+  const round = document.querySelector(".round[id]")?.id; // per round: a new round starts blank
+  const store = `answers:${location.pathname}${round ? `#${round}` : ""}`;
   let saved = {};
   try { saved = JSON.parse(localStorage.getItem(store)) || {}; } catch {}
   const title = (document.querySelector("h1")?.textContent || document.title).trim();
@@ -862,7 +866,8 @@ if (location.protocol.startsWith("http")) (() => {
     copier.classList.add("done");
     setTimeout(() => { copier.classList.remove("done"); copier.textContent = "Copy"; }, 1800);
   });
-  btn.before(acts);
+  const bar = document.querySelector("nav.rounds"); // one bar: with round tabs, Send results sits at the tabs' right
+  bar ? bar.append(acts) : btn.before(acts);
   acts.append(copier, btn, close);
   close.addEventListener("click", () => {
     window.close();

@@ -38,6 +38,7 @@ for (const [w, h] of [[1440, 900], [390, 844]]) {
     for (const root of rounds.length ? rounds : [document]) {
       const n = own(".cta .one", root).length;
       if (n !== 1) out.push(`budget: ${root === document ? "the page" : `round #${root.id}`} needs exactly one .cta p.one (the One thing), found ${n}`);
+      if (own(".cta .next li", root).length === 1 && root.querySelectorAll(".opts[data-q]").length === 1) out.push("budget: one question needs no step list; put the question in the One thing (\"Ship it Friday? Pick, then Send results.\")");
     }
     if (rounds.length && document.querySelectorAll("nav.rounds a").length !== rounds.length) out.push("tabs: nav.rounds needs one link per div.round");
     if (rounds.length === 1) out.push("tabs: one round needs no tabs, drop nav.rounds and its div.round wrapper");
