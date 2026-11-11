@@ -76,9 +76,12 @@ assert len({os.path.dirname(f) for f in paths}) == 1 and "prism-notes" in paths[
 for f in paths: os.remove(f)
 PY
 
-# one chat, one page: tabs per topic, a tab that reloads itself, Send keeps the tab
-grep -q "One chat, one page" "$root/hooks/always.md" || fail "one page per chat rule missing"
-for t in daylight-report midnight-report decision-page; do grep -q "nav.themes" "$root/templates/$t.html" && grep -q "/__prism/stamp" "$root/templates/$t.html" || fail "$t has no chat tabs or live reload"; done
+# one topic, one page: rounds are tabs, a new topic is a new page; a tab that reloads itself, Send keeps the tab
+grep -q "One topic, one page" "$root/hooks/always.md" || fail "one page per topic rule missing"
+grep -q "A new topic is a new page" "$root/hooks/always.md" || fail "new topic rule missing"
+grep -rqi "theme" "$root/hooks/always.md" "$root/skills/prism-reports/references/decisions-and-iterations.md" && fail "topic tabs (themes) are back"
+for t in daylight-report midnight-report decision-page; do grep -q "nav.rounds" "$root/templates/$t.html" && grep -q "/__prism/stamp" "$root/templates/$t.html" || fail "$t has no round tabs or live reload"; done
+grep -q 'class="round" id="round-1"' "$root/templates/decision-page.html" || fail "decision page demo does not show round tabs"
 grep -q "next round loads here" "$root/templates/decision-page.html" || fail "Send results still closes the tab"
 grep -q "tabs:" "$root/scripts/check-report.mjs" || fail "check-report does not check chat tabs"
 grep -q 'class="tabs"' "$root/scripts/reports-index.py" || fail "index does not link chat tabs"

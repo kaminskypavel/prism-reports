@@ -19,7 +19,7 @@ A `SessionStart` hook loads these rules into every session:
 - Anything you read to understand, compare, decide or approve is an HTML page. Files agents read stay markdown.
 - Each page answers first, then frames the One thing the reader must do (15 words max), at most 4 stats, the evidence, and an appendix.
 - Pages live in the repo's `docs/reports/`, `docs/design/` or `docs/decisions/`. Each folder gets an index, and `docs/` gets an index of indexes.
-- When you have to choose, approve or answer, you get a decision page: click your answers, then Send results: the tab closes and the agent gets them, nothing to paste (opened as a file: Copy results, paste back). With several rounds, the latest is on top.
+- When you have to choose, approve or answer, you get a decision page: click your answers, then Send results: the agent gets them, nothing to paste, and the same tab reloads with the next round (opened as a file: Copy results, paste back). Each round is a tab, newest first; a new topic is a new page.
 - Every flow, timeline or architecture is drawn with [diagram-design](https://github.com/cathrynlavery/diagram-design) in the page's colors. Hover or tap any step for what it does and why.
 - Every page is rendered at desktop and phone width and checked before you see it.
 

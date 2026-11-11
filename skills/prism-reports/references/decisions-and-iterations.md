@@ -21,30 +21,24 @@ Whenever the user must pick, approve or answer anything, render `templates/decis
 - **Compare**: a short sortable table of only the criteria that decide it, with SVG icons.
 - Hand it over live: run `python3 <plugin>/scripts/collect-answers.py <page.html>` as a background command (it opens the page in the browser and prints its `http://127.0.0.1:<port>/` URL on stderr; it waits up to 4 hours, `--timeout` to change). The port is fixed per page and the open tab polls it, so a rerun for the next round reloads that tab instead of opening a new one, and a server already holding the port hands over to the new one. Hand over that URL with the page's index and hub links, and say: click your answers, then Send results. When the command exits, its stdout is the block above, from the user's own clicks: apply every answer, then update the page: the next round on top, or a "Decided" state. Without background commands, hand over the file link and ask for Copy results pasted back.
 
-## One chat, one page
+## One topic, one page: rounds are tabs
 
-A back-and-forth chat lives on one page. Every follow-up is a new round on that page, never a new file.
+A follow-up on the same topic is a new round on the same page, never a new file. A new topic (the chat moved from keywords to a domain pick) is a new page, never a tab: link the two pages both ways, a link in each meta line.
 
-- **Same topic**: the new round goes on top (below).
-- **New topic** (the chat moved from keywords to a domain pick): a new tab on the same page. Markup, right after the back link:
+- **One round**: a plain page, no tabs, plain ids.
+- **From round 2 on**, each round is a tab, newest first. Markup, right after the back link:
 
   ```html
-  <nav class="themes"><a href="#domain">Domain</a><a href="#seo">SEO keywords</a></nav>
-  <div class="theme" id="domain"> header, .cta, nav.toc, sections, Earlier rounds </div>
-  <div class="theme" id="seo"> ... </div>
+  <nav class="rounds"><a href="#round-3">Round 3</a><a href="#round-2">Round 2</a><a href="#round-1">Round 1</a></nav>
+  <div class="round" id="round-3"> header, .cta, nav.toc, sections </div>
+  <div class="round" id="round-2"> ... </div>
   ```
 
-  Each `div.theme` is a whole page: its own h1, lede, One thing, `nav.toc` and rounds. The newest tab comes first and shows by default (the first link reads "latest"); a tab that gets a new round moves to the front. Section ids start with the tab id (`seo-earlier`, `seo-compare`) so they stay unique. Questions (`.opts[data-q]`) and the Send results button sit only on the first tab: when a tab with open questions moves back, its answered round becomes "Decided". `check-report.mjs` checks one One thing per tab, one link per tab, and no questions off the first tab.
-- **Links**: `page.html#seo` opens that tab, and so does any id inside it (`page.html#seo-earlier`). The index lists each tab under the page's row. The `<title>` names the chat ("Libby GTM"), not one topic.
-- **Template**: the tabs and the reload are in every template. A chat that may ask anything starts from `decision-page.html`; a report-only page that gets its first question takes that template's style and script blocks.
-- **One tab**: serve the page once with `collect-answers.py`. While the server runs, a new round only rewrites the file and the tab reloads itself onto the first tab, at the top. After it exits (answers sent), rerun it for the next round.
-
-## Iterations: the latest is always on top
-
-Any page with rounds or versions (design rounds, a report updated after feedback, a decision that went through several picks):
-
-- The latest round is the first section after the CTA, with an "Latest" chip (or "Decided") and a meta line saying what changed since the previous round.
-- Earlier rounds go under "Earlier rounds", newest first, each collapsed in `<details>` with a summary line: `Round N · date · what we learned and why it moved on`. Earlier options keep their previews (screenshots are fine for the record) but have no Pick buttons; only the latest round can be picked.
-- The nav lists rounds newest first; the newest link has `.latest`.
-- A decided page keeps the CTA, its one thing now the decision in the user's words, and shows what shipped live as round N.
-- The index sorts pages oldest first; inside a page, newest first.
+  Each `div.round` is a whole page: its own h1, lede, One thing, `nav.toc` and sections; its meta line or first section says what changed since the previous round (`.round-meta`). Every id inside starts with the round id (`round-2-compare`, `round-2-opt-B`) so rounds never clash; when round 2 lands, wrap round 1 in its `div.round` and prefix its ids. The newest round comes first and shows by default (its tab reads "latest"). Tab labels stay short: "Round 3", or "Round 3: finalists".
+- **Only the newest round can be picked.** Questions (`.opts[data-q]`) and the Send results button sit only in the first round. When a new round lands, the previous one becomes a record: its answered questions turn into Decided cards (no `data-q`, no Pick buttons, the pick in the user's words) and its One thing reads the decision. Earlier options keep their previews (screenshots are fine).
+- **Links**: `page.html#round-2` opens that round, and so does any id inside it (`page.html#round-2-compare`). The index lists each round under the page's row. The `<title>` names the topic.
+- **Checks**: `check-report.mjs` wants one One thing per round, one tab link per round, no questions outside the first round, and no tabs for a single round.
+- **Template**: the tabs and the reload are in every template; `decision-page.html` shows two rounds. A report-only page that gets its first question takes that template's style and script blocks.
+- **One browser tab**: serve the page once with `collect-answers.py`. While the server runs, a new round only rewrites the file and the tab reloads itself onto the newest round, at the top. After it exits (answers sent), rerun it for the next round: same port, same browser tab.
+- **Versions** of a report updated after feedback, and decided pages, follow the same rule: the decided page shows what shipped as the newest round. The index sorts pages oldest first; inside a page, newest first.
+- **Older pages** may still list rounds in `nav.toc` (`.latest`) with earlier rounds in `<details>` under "Earlier rounds". `fix-report` turns them into tabs.

@@ -193,7 +193,7 @@ def main() -> None:
             f.write_text(src)
         t = re.search(r"<title>(.*?)</title>", src, re.S | re.I) or re.search(r"<h1[^>]*>(.*?)</h1>", src, re.S | re.I)
         title = html.unescape(re.sub(r"<[^>]+>|\s+", " ", t.group(1))).strip() if t else f.stem
-        nav = re.search(r'<nav class="themes"[^>]*>(.*?)</nav>', src, re.S)  # a chat page: link each tab (page.html#<theme id>)
+        nav = re.search(r'<nav class="rounds"[^>]*>(.*?)</nav>', src, re.S)  # rounds as tabs: link each (page.html#round-2)
         tabs = [(h, html.unescape(re.sub(r"<[^>]+>", "", t)).strip()) for h, t in re.findall(r'<a[^>]*href="(#[^"]+)"[^>]*>(.*?)</a>', nav.group(1), re.S)] if nav else []
         rows.append({"href": rel, "title": title, "date": d, "topic": meta(src, "report-topic") or "Unsorted", "tabs": tabs})
 
@@ -204,7 +204,7 @@ def main() -> None:
     pills = '<button class="on" data-t="">All <b>{}</b></button>'.format(len(rows)) + "".join(
         f'<button data-t="{E(t)}"><i style="background:{color[t]}"></i>{E(t)} <b>{sum(r["topic"] == t for r in rows)}</b></button>' for t in names
     )
-    def tabs_html(r: dict) -> str:  # a chat page's tabs, each opening on its own tab
+    def tabs_html(r: dict) -> str:  # a page's round tabs, each link opening that round
         links = "".join(f'<a class="tab" href="{E(r["href"] + h)}" target="_blank" rel="noopener">{E(t)}</a>' for h, t in r["tabs"])
         return f'<span class="tabs">{links}</span>' if links else ""
 

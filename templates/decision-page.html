@@ -1,7 +1,7 @@
 <!doctype html>
 <!-- Decision page template (Daylight). Use it whenever the user must pick between options or approve a design.
-     Copy, keep the style block and all script blocks, replace the demo content. Latest round first; earlier rounds collapse under "Earlier rounds".
-     One chat, one page: a new topic is a new tab (nav.themes + div.theme, see the CSS), newest first.
+     Copy, keep the style block and all script blocks, replace the demo content. Latest round first.
+     One topic, one page: from round 2 on each round is a tab, newest first (nav.rounds + div.round, see the CSS); a new topic is a new page.
      Rules: skills/prism-reports/SKILL.md in the prism-reports plugin. -->
 <html lang="en">
 <head>
@@ -66,14 +66,15 @@ nav.toc{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;margin:20px -3
 nav.toc::-webkit-scrollbar{display:none}
 nav.toc a{flex:none;text-decoration:none;font-size:13.5px;font-weight:600;color:var(--mute);padding:6px 12px;border-radius:999px}
 nav.toc a:hover{color:var(--ink);background:var(--surface)}nav.toc a.on{color:var(--ink);background:var(--surface);box-shadow:inset 0 0 0 1px var(--line)}
-/* Chat themes: one page per chat. Each theme (a topic the chat moved to) is a tab, newest first; nav.themes sits above them and
-   every div.theme[id] holds its own header, One thing, nav.toc and rounds. page.html#<theme id> opens that tab (the index links each). */
-nav.themes{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;width:max-content;max-width:100%;margin:0 0 22px;padding:4px;border-radius:999px;background:var(--track)}
-nav.themes::-webkit-scrollbar{display:none}
-nav.themes a{flex:none;text-decoration:none;font-size:13.5px;font-weight:600;color:var(--mute);padding:6px 14px;border-radius:999px}
-nav.themes a:hover{color:var(--ink)}nav.themes a.on{color:var(--ink);background:var(--surface);box-shadow:0 1px 2px rgba(0,0,0,.08)}
-nav.themes a:first-child::after{content:"latest";margin-left:6px;font-size:11px;font-weight:700;color:var(--accent)}
-.theme{scroll-margin-top:70px}
+/* Rounds: one topic, one page (a new topic is a new page, linked both ways). From round 2 on each round is a tab, newest first:
+   nav.rounds right after the back link, then one div.round[id="round-N"] per round, each a whole page (header, One thing, nav.toc,
+   sections) with its ids prefixed by the round id. page.html#round-2 opens that round (the index links each). */
+nav.rounds{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 0 26px;border-bottom:2px solid var(--ink)}
+nav.rounds::-webkit-scrollbar{display:none}
+nav.rounds a{flex:none;display:flex;align-items:center;gap:8px;text-decoration:none;font-size:15px;font-weight:700;color:var(--mute);padding:10px 18px;background:var(--surface);border:1.5px solid var(--line);border-bottom:0;border-radius:10px 10px 0 0}
+nav.rounds a:hover{color:var(--ink);border-color:var(--ink)}nav.rounds a.on{color:var(--bg);background:var(--ink);border-color:var(--ink)}
+nav.rounds a:first-child::after{content:"latest";font-size:11px;font-weight:700;line-height:1;padding:4px 8px;border-radius:999px;background:var(--accent);color:var(--bg)}
+.round{scroll-margin-top:70px}
 /* sections + panels */
 section{margin-top:44px;scroll-margin-top:64px}
 .dh{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
@@ -135,7 +136,7 @@ th[aria-sort=ascending]::after{transform:rotate(-135deg) translateY(-1px);opacit
 .dt-bar input,.dt-bar select,.dt-bar button{font:inherit;font-size:13px;padding:7px 12px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
 .dt-bar input{min-width:220px}.dt-bar button{cursor:pointer;color:var(--mute)}.dt-bar button:hover{color:var(--ink)}
 .dt-count{margin-left:auto;font-size:13px;color:var(--mute)}
-/* iterations: newest first. Round/version links in nav.toc (latest marked .latest); the latest round is the first section after the CTA; earlier rounds collapse in <details> under "Earlier rounds", newest of them first. */
+/* iterations: newest first. From round 2 on each round is a tab (nav.rounds above); a round's first section says what changed since the previous round in .round-meta. Older pages list rounds in nav.toc (.latest) with earlier ones in <details>. */
 nav.toc a.latest::after{content:"latest";margin-left:6px;font-size:11px;font-weight:700;color:var(--accent)}
 .round-meta{font-size:13px;color:var(--mute);margin:2px 0 14px}
 /* appendix */
@@ -245,8 +246,8 @@ dialog.send-box::backdrop{background:rgba(20,20,20,.35)}.send-box h3{margin:0 0 
 @media (min-width:1180px){
   body:has(.opts[data-q]) .wrap{margin-left:calc(256px + max(0px, (100vw - 256px - 1120px) / 2))}
   .wiz{display:block;position:fixed;z-index:11;inset:0 auto 0 0;width:256px;overflow:hidden auto;padding:28px 18px 24px 22px;background:var(--surface);border-right:1px solid var(--line)}
-  /* chat themes: the questions live on the first (newest) tab; on an older tab the sidebar steps aside */
-  body:has(.theme[hidden] .opts[data-q]) .wrap{margin-left:auto}body:has(.theme[hidden] .opts[data-q]) .wiz{display:none}
+  /* rounds: the questions live on the first (newest) round; on an older round the sidebar steps aside */
+  body:has(.round[hidden] .opts[data-q]) .wrap{margin-left:auto}body:has(.round[hidden] .opts[data-q]) .wiz{display:none}
 }
 .wiz-h{display:flex;justify-content:space-between;gap:6px;margin:0 0 14px;font-size:12.5px;font-weight:700;white-space:nowrap}
 .wiz-h .wq{color:var(--ink)}.wiz-h .wn{color:var(--mute);font-weight:600;font-variant-numeric:tabular-nums}
@@ -274,6 +275,9 @@ nav.toc .pill{position:absolute;top:10px;left:0;height:31px;border-radius:999px;
 <body>
 <div class="wrap">
   <a class="report-back" dir="ltr" href="index.html" style="display:inline-block;margin:0 0 18px;padding:6px 14px;border-radius:999px;background:#141414;color:#fff;text-decoration:none;font:600 13px/1.4 -apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,sans-serif">&larr; All designs</a>
+  <nav class="rounds"><a href="#round-2">Round 2</a><a href="#round-1">Round 1</a></nav>
+  <!-- One round: no nav.rounds and no div.round wrapper, plain ids. From round 2 on, each round is a div.round, newest first, ids prefixed. -->
+  <div class="round" id="round-2">
   <header>
     <h1>Which option should we ship for the thing being decided?</h1>
     <p class="lede">Recommendation: B, in one sentence that names why.</p>
@@ -284,25 +288,25 @@ nav.toc .pill{position:absolute;top:10px;left:0;height:31px;border-radius:999px;
     <p class="one-h">One thing</p>
     <p class="one"><mark>Answer 2 questions, then <span class="verb">Send results</span> (top right).</mark></p>
     <ol class="next">
-      <li><div><b><a href="#round-2">Which option should we ship?</a></b><span>B recommended</span></div></li>
-      <li><div><b><a href="#ship">Ship it this week?</a></b><span>Yes recommended</span></div></li>
+      <li><div><b><a href="#round-2-pick">Which option should we ship?</a></b><span>B recommended</span></div></li>
+      <li><div><b><a href="#round-2-ship">Ship it this week?</a></b><span>Yes recommended</span></div></li>
     </ol>
   </div>
 
-  <nav class="toc"><a class="latest" href="#round-2">Round 2</a><a href="#ship">Ship it?</a><a href="#compare">Compare</a><a href="#earlier">Round 1</a><button class="copy-all" type="button">Copy results</button></nav>
+  <nav class="toc"><a href="#round-2-pick">Finalists</a><a href="#round-2-ship">Ship it?</a><a href="#round-2-compare">Compare</a><button class="copy-all" type="button">Copy results</button></nav>
 
-  <section id="round-2">
-    <div class="dh"><h2>Round 2: the two finalists</h2><span class="chip accent">Latest</span></div>
+  <section id="round-2-pick">
+    <div class="dh"><h2>Round 2: the two finalists</h2></div>
     <p class="round-meta">YYYY-MM-DD HH:MM · what changed since round 1, in one line</p>
     <div class="opts" data-q="Which option should we ship?">
-      <article class="opt" data-key="A" data-name="Short name A" id="opt-A">
+      <article class="opt" data-key="A" data-name="Short name A" id="round-2-opt-A">
         <div class="opt-h"><b>A. Short name</b></div>
         <p>One line on what this option is.</p>
         <div class="preview">mockup, screenshot (img) or live HTML in the product's own style</div>
         <ul class="pc"><li>What it does well</li><li class="con">What it costs or risks</li></ul>
         <button class="pick" type="button">Pick A</button>
       </article>
-      <article class="opt" data-key="B" data-name="Short name B" id="opt-B">
+      <article class="opt" data-key="B" data-name="Short name B" id="round-2-opt-B">
         <div class="opt-h"><b>B. Short name</b><span class="chip good">Recommended</span></div>
         <p>One line on what this option is.</p>
         <div class="preview">mockup, screenshot (img) or live HTML in the product's own style</div>
@@ -312,7 +316,7 @@ nav.toc .pill{position:absolute;top:10px;left:0;height:31px;border-radius:999px;
     </div>
   </section>
 
-  <section id="ship">
+  <section id="round-2-ship">
     <div class="dh"><h2>Ship it this week?</h2></div>
     <p class="thesis">One line on what shipping now means. Yes/no and approvals use the same cards, without previews.</p>
     <div class="opts" data-q="Ship it this week?">
@@ -321,7 +325,7 @@ nav.toc .pill{position:absolute;top:10px;left:0;height:31px;border-radius:999px;
     </div>
   </section>
 
-  <section id="compare">
+  <section id="round-2-compare">
     <div class="dh"><h2>How do they compare?</h2></div>
     <p class="thesis">Only the criteria that decide it.</p>
     <div class="panel"><table><thead><tr><th>Criterion</th><th>A</th><th>B</th></tr></thead><tbody>
@@ -329,14 +333,20 @@ nav.toc .pill{position:absolute;top:10px;left:0;height:31px;border-radius:999px;
       <tr><td>Criterion two</td><td><svg class="ic no" viewBox="0 0 20 20" aria-label="no"><path d="M6 6l8 8M14 6l-8 8"/></svg></td><td><svg class="ic ok" viewBox="0 0 20 20" aria-label="yes"><path d="M5 10.5l3.2 3.2L15 7"/></svg></td></tr>
     </tbody></table></div>
   </section>
+  </div>
 
-  <section id="earlier">
-    <div class="dh"><h2>Earlier rounds</h2></div>
-    <p class="thesis">Newest first. Kept for the record; only the latest round can be picked.</p>
-    <details><summary>Round 1 · YYYY-MM-DD HH:MM · what we learned and why it moved on</summary>
-      <div class="opts"><article class="opt"><div class="opt-h"><b>Option from round 1</b></div><div class="preview">preview</div></article></div>
-    </details>
+  <div class="round" id="round-1">
+  <header>
+    <h1>Which option should we ship for the thing being decided?</h1>
+    <p class="lede">Decided: A and B go on to round 2.</p>
+    <p class="sub">Round 1 of 2 · YYYY-MM-DD HH:MM · kept for the record, picks closed</p>
+  </header>
+  <div class="cta"><p class="one-h">One thing</p><p class="one"><mark>Decided: keep A and B, drop the rest.</mark></p></div>
+  <section id="round-1-pick">
+    <div class="dh"><h2>Round 1: four directions</h2><span class="chip good">Decided</span></div>
+    <div class="opts"><article class="opt"><div class="opt-h"><b>Option from round 1</b></div><div class="preview">preview</div></article></div>
   </section>
+  </div>
 </div>
 <script>
 /* Tables: every <table> (and .mx matrix) gets a horizontal scroller for narrow screens; every <table> gets click-to-sort headers.
@@ -473,30 +483,30 @@ document.addEventListener("click", (e) => {
   }, { rootMargin: "-35% 0px -60% 0px" });
   for (const s of document.querySelectorAll("section[id]")) io.observe(s);
 })();
-/* Chat themes (see nav.themes in the CSS): show the tab that holds the URL's #id, else the first (newest). Tab links and any in-page
-   jump into another tab switch to it, so page.html#<theme id> or #<section id> opens straight on that tab. */
+/* Rounds (see nav.rounds in the CSS): show the round that holds the URL's #id, else the first (newest). Tab links and any in-page
+   jump into another round switch to it, so page.html#round-2 or #round-2-compare opens straight on that round. */
 (() => {
-  const themes = [...document.querySelectorAll(".theme[id]")];
-  if (!themes.length) return;
+  const rounds = [...document.querySelectorAll(".round[id]")];
+  if (!rounds.length) return;
   const show = () => {
     const t = document.getElementById(decodeURIComponent(location.hash.slice(1)));
-    const th = t?.closest(".theme") || themes[0];
+    const th = t?.closest(".round") || rounds[0];
     const moved = th.hidden;
-    for (const x of themes) x.hidden = x !== th;
-    for (const a of document.querySelectorAll("nav.themes a")) a.classList.toggle("on", a.hash === `#${th.id}`);
+    for (const x of rounds) x.hidden = x !== th;
+    for (const a of document.querySelectorAll("nav.rounds a")) a.classList.toggle("on", a.hash === `#${th.id}`);
     if (moved && t) t.scrollIntoView();
   };
   show();
   addEventListener("hashchange", show);
 })();
-/* Served by scripts/collect-answers.py, the page reloads itself when its file changes or the server restarts, so a whole chat
-   stays in one tab: each new round shows up in place, newest tab first. */
+/* Served by scripts/collect-answers.py, the page reloads itself when its file changes or the server restarts, so a topic
+   stays in one browser tab: each new round shows up in place, as the first round tab. */
 if (location.protocol.startsWith("http")) (() => {
   let seen;
   const tick = () => fetch("/__prism/stamp", { cache: "no-store" }).then((r) => (r.ok ? r.text() : null), () => null).then((s) => {
     if (s && seen && s !== seen) {
       history.scrollRestoration = "manual";
-      history.replaceState(null, "", location.pathname); // the new round is on the first tab, at the top
+      history.replaceState(null, "", location.pathname); // the new round is the first tab, at the top
       return location.reload();
     }
     seen = s || seen;
@@ -882,7 +892,7 @@ if (location.protocol.startsWith("http")) (() => {
   if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   import("https://cdn.jsdelivr.net/npm/motion@14.9.0/+esm").then(({ animate }) => {
     const ease = [0.16, 1, 0.3, 1], spring = { type: "spring", bounce: 0.2, duration: 0.45 };
-    for (const nav of document.querySelectorAll("nav.toc")) { // one per chat theme
+    for (const nav of document.querySelectorAll("nav.toc")) { // one per round
       const pill = Object.assign(document.createElement("i"), { className: "pill" });
       nav.prepend(pill); nav.classList.add("slide");
       let first = true;

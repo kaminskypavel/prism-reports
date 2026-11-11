@@ -34,13 +34,14 @@ for (const [w, h] of [[1440, 900], [390, 844]]) {
     const words = (el) => el.textContent.split(/\s+/).filter((x) => /[\p{L}\p{N}]/u.test(x)).length;
     const own = (sel, root = document) => [...root.querySelectorAll(sel)].filter((el) => !el.closest(".preview")); // previews show the product, not the page
     const out = [];
-    const themes = [...document.querySelectorAll(".theme[id]")]; // a chat page: one One thing per tab
-    for (const root of themes.length ? themes : [document]) {
+    const rounds = [...document.querySelectorAll(".round[id]")]; // rounds as tabs: one One thing per round
+    for (const root of rounds.length ? rounds : [document]) {
       const n = own(".cta .one", root).length;
-      if (n !== 1) out.push(`budget: ${root === document ? "the page" : `tab #${root.id}`} needs exactly one .cta p.one (the One thing), found ${n}`);
+      if (n !== 1) out.push(`budget: ${root === document ? "the page" : `round #${root.id}`} needs exactly one .cta p.one (the One thing), found ${n}`);
     }
-    if (themes.length > 1 && document.querySelectorAll("nav.themes a").length !== themes.length) out.push("tabs: nav.themes needs one link per div.theme");
-    for (const t of themes.slice(1)) if (t.querySelector(".opts[data-q]")) out.push(`tabs: questions live on the first (newest) tab only, found some in #${t.id}`);
+    if (rounds.length && document.querySelectorAll("nav.rounds a").length !== rounds.length) out.push("tabs: nav.rounds needs one link per div.round");
+    if (rounds.length === 1) out.push("tabs: one round needs no tabs, drop nav.rounds and its div.round wrapper");
+    for (const t of rounds.slice(1)) if (t.querySelector(".opts[data-q]")) out.push(`tabs: questions live on the first (newest) round only, found some in #${t.id}`);
     for (const [sel, cap] of [[".one", 15], [".lede", 25], [".next li", 14], [".thesis", 20]])
       for (const el of own(sel)) if (words(el) > cap) out.push(`budget: ${sel} has ${words(el)} words, cap ${cap}: "${el.textContent.trim().slice(0, 70)}"`);
     // An option's visual sits in its own card: a figure captioned with an option's name, outside the cards, splits the pick from what it picks.
